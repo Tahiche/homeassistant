@@ -1,0 +1,155 @@
+# Home Assistant .gitignore
+# This file excludes sensitive data, logs, cache, and temporary files from version control
+
+# === SENSITIVE DATA ===
+# Never commit secrets, passwords, or tokens
+secrets.yaml
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Home Assistant database
+home-assistant_v2.db*
+home-assistant.db*
+*.db-shm
+*.db-wal
+
+# === LOGS AND TEMPORARY FILES ===
+# Log files
+*.log
+*.log.*
+home-assistant.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+.DS_Store
+Thumbs.db
+
+# === CACHE AND GENERATED FILES ===
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Home Assistant specific cache/generated
+.storage/
+.cloud/
+tts/
+www/community/
+deps/
+zigbee.db*
+*.pid
+
+# Node modules (if using any JS/Node tools)
+node_modules/
+
+# === DEVICE SPECIFIC FILES ===
+# Known devices (contains MAC addresses and device info)
+known_devices.yaml
+
+# IP bans
+ip_bans.yaml
+
+# === INTEGRATION SPECIFIC ===
+# Harmony hub configuration
+harmony_*.conf
+
+# Zigbee2MQTT
+zigbee2mqtt/log/
+zigbee2mqtt/database.db*
+
+# Custom component caches
+custom_components/**/__pycache__/
+custom_components/**/*.pyc
+
+# HACS
+custom_components/hacs/
+
+# === MEDIA AND LARGE FILES ===
+# Images and media
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp3
+*.mp4
+*.avi
+*.mov
+*.wav
+
+# Exception: Keep small config images
+!image/
+image/**/*
+!image/**/small_*
+!image/**/*_icon.*
+
+# === BACKUPS ===
+# Home Assistant backups
+*.tar
+backups/
+__safe__bkups/
+
+# Personal backup files
+*_backup.*
+*_old.*
+*_copy.*
+
+# === DEVELOPMENT AND TESTING ===
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# === CUSTOM EXCLUSIONS ===
+# Specific to this setup
+alexa_media*.html
+mqtt_dump.txt
+glances/
+
+# Configuration copies/backups with sensitive data
+*safe*.yaml
+*safe*.yml
+
+# === ALLOW IMPORTANT CONFIGS ===
+# Make sure to track important configuration files
+!configuration.yaml
+!automations.yaml
+!scripts.yaml
+!scenes.yaml
+!customize.yaml
+!groups.yaml
+
+# Allow custom integrations source code
+!custom_components/
+!custom_components/**/*.py
+!custom_components/**/*.json
+!custom_components/**/*.md
+!custom_components/**/*.txt
+!custom_components/**/translations/
+
+# Allow blueprint configurations
+!blueprints/
+!blueprints/**/*.yaml
+
+# Allow custom configuration folders
+!my-integrations/
+!my-integrations/**/*.yaml
+
+# Allow themes
+!themes/
+!themes/**/*.yaml
