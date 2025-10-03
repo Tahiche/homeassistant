@@ -1,0 +1,21 @@
+- sensor:
+  - name: Last Alexa
+    unique_id: last_alexa
+    state: |-
+      {{ expand(integration_entities('alexa_media') | select('search', 'media_player'))
+      | selectattr('attributes.last_called', 'eq', True) | map(attribute='entity_id') | first }}
+    availability: |-
+      {{ expand(integration_entities('alexa_media') | select('search', 'media_player'))
+      | selectattr('attributes.last_called','eq',True) | first is defined }}
+- sensor:
+  - name: Alexa Volume LastAlexa
+    unique_id: alexa_volume_last_sensor
+    state: |-
+       {% set last = states("sensor.last_alexa") -%} 
+       {{ state_attr(last, 'volume_level') | float(default=0) * 100 | round(1)  }}
+    availability: |-
+      {% if states("sensor.last_alexa") != "unknown" and states("sensor.last_alexa") != "unavailable" %}
+        true
+      {% else %}
+        false
+      {% endif %}

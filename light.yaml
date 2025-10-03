@@ -1,0 +1,28 @@
+- platform: group
+  name: "HA Dummy Lights"
+  #entity_id: ha_group_alexa_virtual
+  entities:
+    - light.ha_alexa_virtual
+    - light.ha_alexa_virtual2
+
+- platform: template
+  lights:
+    ha_alexa_virtual:
+      unique_id: ha_alexa_virtual_1
+      friendly_name: "HA Dummy Light 1"
+      turn_on:
+
+      turn_off:
+
+      set_level:
+
+- platform: template
+  lights:
+    ha_alexa_virtual2:
+      unique_id: ha_alexa_virtual_2
+      friendly_name: "HA Dummy Light 2"
+      turn_on:
+
+      turn_off:
+
+      set_level:

@@ -1,0 +1,88 @@
+smart_home:
+  #locale: es-ES
+  endpoint: https://api.eu.amazonalexa.com/v3/events
+  client_id: amzn1.application-oa2-client.7340bc566943456f9751fff16bab1418
+  client_secret: amzn1.oa2-cs.v1.36c14e1ba2294a8233e8e05ee056706c04758865631e5bb3c47e0033233f1d6a
+  
+  # FILTER WHAT IS EXPOSED TO ALEXA
+  # https://www.home-assistant.io/integrations/alexa.smart_home
+  filter:
+      exclude_domains:
+        - automation
+        - camera
+        - group
+        - script
+        - sensor
+        - remote
+        - media_player
+        - binary_sensor
+        - input_boolean
+      include_domains:
+        - light
+      # anythig with _alexa_ha_ in name or [entity].ha_[name] should be included
+      include_entity_globs:
+        - automation.ha_*
+        - camera.ha_*
+        - light.ha_*
+        - binary_sensor.ha_*
+        - script.ha_*
+        - media_player.ha_*
+        - sensor.ha_*
+        - remote.ha_*
+        - group.ha_*
+        - input_boolean.ha_*
+        - switch.ha_*
+        - '*.alexa_ha_*'
+        - '*.*_alexa_ha_' 
+        - '*.*_alexa_ha_*' # any entity containing _alexa_ha_ in name
+        - '*.*_ha_*' # any entity containing _ha_ in name
+        - '*.*_ha'  # any entity ends _ha
+      include_entities:
+        - media_player.yamaha_molino
+        - binary_sensor.alexa_ha_tydom_wifiplug_sensor
+        - remote.logitechhub
+        - sensor.echo_de_tahiche_temperature
+        - input_boolean.alert_when_high_processor_load
+        - switch.ikeaplug_1_studio
+        - switch.sonoff_plug_2_ha
+        
+      exclude_entities:
+        - media_player.yamaha_receiver_family_room
+        - input_boolean.alexa_ha_tydom_heat_plug_input
+
+        
+  # expose_by_default: false # invalid !
+  entity_config:
+    media_player.yamaha_molino:
+      name: "Amplificador"
+      description: "Yamaha rv483 receiver"
+      display_categories: MUSIC_SYSTEM,STREAMING_DEVICE,SPEAKER
+    media_player.yamaha_receiver_family_room:
+      name: "Yamaha Receiver"
+      description: "Yamaha RX-V483 receiver"
+      display_categories: MUSIC_SYSTEM,STREAMING_DEVICE,SPEAKER
+    input_boolean.alert_when_high_processor_load:
+      name: "HA Alert when high CPU load"
+      description: "Alert when high processor load"
+      display_categories: SWITCH
+    switch.ikeaplug_1_studio:
+      name: "Ikea Plug Studio"
+      description: "Ikea smart plug in studio"
+      display_categories: SWITCH,LIGHT
+
+    # switch.sonoff_plug_2_ha:
+    #   name: "Sonoff Plug HA"
+    #   description: "Sonoff smart plug in Home Assistant"
+    #   display_categories: SWITCH,LIGHT
+    #  name: "HA Dummy Light"
+    #  description: "Home Assistant dumy light template"
+    #  display_categories: LIGHT,SWITCH
+
+    #input_boolean.alexa_ha_tydom_heat_plug_input:
+    #  display_categories: SWITCH,SMARTPLUG,THERMOSTAT
+    #  description: "Home Assistant Tydom Heat connection"
+    #  name: "HA PLUG Heat Plug Switch"
+    #light.alexa_virtual:
+    #  name: "HA Dummy Light"
+    #  description: "Home Assistant dumy light template"
+    #  display_categories: LIGHT,SWITCH

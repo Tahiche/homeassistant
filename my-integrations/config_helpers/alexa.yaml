@@ -1,0 +1,10 @@
+# helper inputs and booleans that act as config
+
+# "Do not notify on Alexa devices, for automations, etc..."
+
+# If you set a valid value for initial this integration will start with the state set to that value. Otherwise, it will restore the state it had prior to Home Assistant stopping; if there is no state to restore - an off value is set.
+input_boolean:
+  mute_alexa_notifications:
+    name: "Mute Alexa Notifications"
+  mute_alexa_estudio_notifications:
+    name: "Mute Alexa Estudio Notifications"

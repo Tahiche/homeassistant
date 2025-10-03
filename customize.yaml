@@ -1,0 +1,15 @@
+binary_sensor.ha_calefaccion_wifi_plug_sensor:
+  device_class: door
+  friendly_name: HA - Calefaccion wifi Plug Sensor
+binary_sensor.ha_calefaccion_wifi_plug_sensor_legacy:
+  device_class: door
+  friendly_name: HA - Calefaccion wifi Plug Sensor Legacy Customize
+group.tahi_bigsur_device_sensors:
+  friendly_name: Tahi BigSur Device Sensors
+  device_class: device_tracker
+group.bigsur_status:
+  friendly_name: BigSur Status
+  device_class: device_tracker
+group.casa_residents:
+  friendly_name: Casa Residents
+  device_class: device_tracker

@@ -1,0 +1,57 @@
+# https://github.com/snarky-snark/home-assistant-variables
+# Variables for Home Assistant
+# we use restore: false # restart home assiatmt will reset value to initial... act like static vars
+wifi_casaflores:
+  unique_id: wifi_casaflores
+  friendly_name: 'Wifi Name at CasaFlores'
+  initial_value: 'Flowers'
+  restore: false # restart home assiatmt will reset value to initial... 
+  icon: mdi:wifi
+
+wifi_casaflores_array:
+  unique_id: wifi_casaflores_array
+  friendly_name: 'Wifi Array at CasaFlores'
+  restore: false # restart home assiatmt will reset value to initial... 
+  initial_value: 
+    - 'Flowers-Wifi7'
+    - 'Flowers'
+    - 'Flowers_EXT'
+    - 'CasaMolino'
+  icon: mdi:wifi
+
+
+wifi_bigsur_array:
+  unique_id: wifi_bigsur_array
+  friendly_name: 'Wifi Array at BigSur'
+  restore: false # restart home assiatmt will reset value to initial... 
+  initial_value: 
+    - 'BigSur'
+    - 'BIG_SUR_PLUS'
+    - 'BigSur_EXT'
+  icon: mdi:wifi
+  
+# for bluetooth and ping device trackers.
+# mac address for tahi phone pixel 8a
+tahi_phone_mac:
+    initial_value: 'E8:D5:2B:1F:B7:34'
+    restore: false
+    icon: mdi:wifi
+
+noe_phone_mac:
+    initial_value: 'FC:41:16:E3:48:72'
+    restore: false
+    icon: mdi:wifi
+## GPS coordinates
+# lastras GPS coords: [40.3020089,-4.600871]
+# casaMolino GPS : [40.42415750701731, -3.70277613401413]
+
+bigsur_gps:
+    unique_id: bigsur_gps
+    initial_value: '[40.3020089,-4.600871]'
+    restore: false
+
+casaflores_gps:
+    unique_id: casaflores_gps
+    initial_value: '[40.4329183, -3.7167724]'
+    restore: false
+    

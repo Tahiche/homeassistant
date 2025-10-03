@@ -1,0 +1,29 @@
+
+- name: panel-automations
+  # url_path needs to be unique for each panel_custom config
+  url_path: config/automation/dashboard
+  sidebar_title: Automations
+  sidebar_icon: mdi:home-automation
+  module_url: /local/panel-redirect.js
+
+- name: devices
+  # url_path needs to be unique for each panel_custom config
+  url_path: config/devices/dashboard
+  sidebar_title: Devices
+  sidebar_icon: mdi:devices
+  module_url: /local/panel-redirect.js
+
+- name: autodash
+  # url_path needs to be unique for each panel_custom config
+  url_path: lovelace/0
+  sidebar_title: AutoDash
+  sidebar_icon: mdi:view-dashboard
+  module_url: /local/panel-redirect.js  
+
+- name: logs
+  # url_path needs to be unique for each panel_custom config
+  url_path: config/logs/dashboard
+  sidebar_title: Logs
+  sidebar_icon: mdi:file-document
+  module_url: /local/panel-redirect.js
+  

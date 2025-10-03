@@ -1,0 +1,148 @@
+# Bayesian presence sensor integrating WiFi, Bluetooth and GPS
+# Place this in your configuration.yaml or in the appropriate sensors folder
+# Bayesian sensor for person presence detection
+binary_sensor:
+  - platform: bayesian
+    unique_id: tahi_casa_bayesian_sensor
+    name: "Tahi Casa Bayesian Binary Sensor (Source)"
+    # device_class: 'presence'
+    prior: 0.5
+    probability_threshold: 0.9
+    observations:
+      # 1. GPS/Mobile App Tracker (The primary away indicator)
+      - platform: 'template'
+        value_template: "{{ is_state('device_tracker.tahi_phone', 'home') or is_state('device_tracker.tahi_phone', 'CasaFlores') }}"
+        prob_given_true: 0.85
+        prob_given_false: 0.15
+  
+      # 2. Wi-Fi Connection (The primary fast arrival indicator)
+      #    We use a Template to ensure the Wi-Fi status is recent.
+      # Check if the Wi-Fi sensor shows the HOME SSID 
+        # AND has been updated in the last 15 minutes (900 seconds) 
+      - platform: template
+        value_template: >
+          {% set wifi_sensor = 'sensor.tahi_phone_wi_fi_connection' %}
+          {% set last_update = as_timestamp(now()) - as_timestamp(state_attr(wifi_sensor, 'last_updated')) %}
+          {{ states(wifi_sensor) in states('var.wifi_casaflores_array') and last_update < 900 }}
+
+        # High confidence for 'true' (if both conditions met)
+        prob_given_true: 0.95
+        # Lower confidence for 'false' (it could still be home but the Wi-Fi just failed to update in 15 min)
+        prob_given_false: 0.40 
+        
+      # 3. Bluetooth Tracker (Good for in-home, still a strong indicator)
+      - entity_id: 'device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34'
+        platform: 'state'
+        to_state: 'home'
+        prob_given_true: 0.90
+        prob_given_false: 0.30
+
+# Template sensor to add observed entity states as attributes
+
+sensor:
+  - platform: template
+    sensors:
+      tahi_casa_presence_bayesian_with_attributes:
+        unique_id: tahi_casa_reliable_sensor
+        friendly_name: "Tahi Casa Reliable Sensor (Bayesian Entity States)"
+        value_template: >-
+          {% if is_state('binary_sensor.tahi_casa_bayesian_sensor', 'on') %}
+            home
+          {% else %}
+            away
+          {% endif %}
+        icon_template: >
+          {% if is_state('binary_sensor.tahi_casa_bayesian_sensor', 'on') %}
+            mdi:home-account
+          {% else %}
+            mdi:home-minus-outline
+          {% endif %}
+        attribute_templates:
+          # Diagnostic info
+          last_updated: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+          last_changed: "{{ states.binary_sensor.tahi_casa_bayesian_sensor.last_changed }}"
+          last_updated_minutes_ago: >
+            {% set last_update = as_timestamp(now()) - as_timestamp(states.binary_sensor.tahi_casa_bayesian_sensor.last_updated) %}
+            {{ (last_update / 60) | round(1) }}
+          # Core bayesian sensor info
+          probability: "{{ state_attr('binary_sensor.tahi_casa_bayesian_sensor', 'probability') }}"
+         
+          # States of observed entities
+          gps_tracker_state: "{{ states('device_tracker.tahi_phone') }}"
+          gps_tracker_last_changed: "{{ states.device_tracker.tahi_phone.last_changed }}"
+          gps_tracker_last_updated_minutes_ago: >
+            {% set last_update = as_timestamp(now()) - as_timestamp(states.device_tracker.tahi_phone.last_updated) %}
+            {{ (last_update / 60) | round(1) }}
+
+          wifi_connection_state: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"
+          wifi_connection_last_updated: "{{ state_attr('sensor.tahi_phone_wi_fi_connection', 'last_updated') }}"
+          wifi_is_home_network: >
+            {{ states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_casaflores_array') }}
+          wifi_last_update_minutes_ago: >
+            {% set last_update = as_timestamp(now()) - as_timestamp(states.sensor.tahi_phone_wi_fi_connection.last_updated) %}
+            {{ (last_update / 60) | round(1) }}
+          
+          bluetooth_tracker_state: "{{ states('device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34') }}"
+          bluetooth_tracker_last_changed: "{{ states.device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34.last_changed }}"
+          bluetooth_tracker_last_updated_minutes_ago: >
+            {% set last_update = as_timestamp(now()) - as_timestamp(states.device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34.last_updated) %}
+            {{ (last_update / 60) | round(1) }}
+    
+          # Summary of all entity states for quick reference
+          entity_states_summary: >-
+            GPS: {{ states('device_tracker.tahi_phone') }} |
+            WiFi: {{ states('sensor.tahi_phone_wi_fi_connection') }} |
+            Bluetooth: {{ states('device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34') }} |
+
+          observations: "{{ state_attr('binary_sensor.tahi_casa_bayesian_sensor', 'observations') }}"
+
+
+# Note: NO 'homeassistant:' or 'packages:' header here
+switch:
+  - platform: template  # This is the "Legacy" format
+    switches:
+      tahi_casa_presence_switch_ha:
+        unique_id: tahi_casa_presence_switch_ha
+        friendly_name: "HA Tahi Casa Presence Switch"
+        value_template: >
+          {{ is_state('binary_sensor.tahi_casa_bayesian_sensor', 'on') }}
+        turn_on:
+          service: system_log.write
+          data:
+            message: "Tahi Casa Presence Switch turn_on called (read-only switch)"
+            level: info
+        turn_off:
+          service: system_log.write
+          data:
+            message: "Tahi Casa Presence Switch turn_off called (read-only switch)"
+            level: info
+        
+
+
+#require_movement (Optional): true or false. If true, will skip update from a GPS-based tracker if it has not moved. Specifically, if circle defined by new GPS coordinates and accuracy overlaps circle defined by previous GPS coordinates and accuracy then update will be ignored.
+#driving_speed (Optional): Defines a driving speed threshold (in MPH or KPH, depending on general unit system setting.) If set, and current speed is at or above this value, and tracker is not in a zone, then the state of the tracker will be set to driving.
+
+composite:
+  trackers:
+    - name: Tahi Casa Presence (Composite Bayesian)
+      id: tahi_casa_composite_bayesian
+      entity_id:
+        - binary_sensor.tahi_casa_bayesian_sensor
+
+    - name: Tahi Casa Composite All
+      id: tahi_casa_composite
+      entity_id:
+        - device_tracker.tahi_phone
+        - device_tracker.tracker_wifi_tahi
+        - device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
+## If only non-GPS-based devices are in use, then the composite device will be 'home' 
+# if any of the watched devices are 'home'/'on', and will be 'not_home' only when all the watched devices are 'not_home'/'off'.
+    - name: Tahi Casa Composite Non-GPS Only
+      id: tahi_casa_composite_non_gps
+      entity_id:
+        - entity: device_tracker.tracker_wifi_tahi
+        - entity: device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
+
+
+
+

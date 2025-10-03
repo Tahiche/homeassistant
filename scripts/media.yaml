@@ -1,0 +1,18 @@
+volume_change:
+  alias: Volume Change MediaPlayer
+  fields:
+    media_player:
+      description: Media Player with volume to adjust..
+      example: media_player.echo_dot (or states('sensor.last_alexa') )
+      required: true
+    increment:
+      description: Change from current volume. If changing a percentage value, convert to decimals first (e.g. +5% should be 0.05). (+) Louder. (-) Quieter.
+      example: 0.05 (5% louder)
+      required: true
+  sequence:
+    service: media_player.volume_set
+    target:
+      entity_id: "{{ media_player }}"
+    data:
+      volume_level:  >-
+        {{state_attr(media_player, "volume_level")|float + increment}}

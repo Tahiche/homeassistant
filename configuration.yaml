@@ -1,0 +1,90 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Main Home Assistant configuration block
+homeassistant:
+  # Loads package configurations from 'my-integrations' directory
+  packages: 
+    # Loads all YAML files from config/packages/area/
+    bigsur_tracking: !include my-integrations/trackers/bigsur_trackers.yaml
+    casaflores_tracking: !include my-integrations/trackers/casaflores_trackers.yaml
+    #composite_trackers: !include my-integrations/trackers/composite_trackers.yaml
+    tahi_bayesian_trackers: !include my-integrations/trackers/tahi_bayesian_composite.yaml
+    noe_bayesian_trackers: !include my-integrations/trackers/noe_bayesian_composite.yaml
+    # bluetooth_trackers: !include my-integrations/trackers/bluetooth_tracking.yaml  # Commented out - now using config entry
+    config_helpers_alexa: !include my-integrations/config_helpers/alexa.yaml
+    #bigsur_heating: !include_dir_named my-integrations/bigsur_heating
+    #config_helpers: !include_dir_named my-integrations/config_helpers
+
+  customize: !include customize.yaml
+# default options for composite trackers
+composite:
+  default_options:
+    require_movement: true
+    driving_speed: 15
+# This is the entry for logging (it's separate)
+logger:
+  default: warning
+  logs:
+    # Set the logging level for your specific component to DEBUG
+    custom_components.dbus_bt_tracker_v2: warning #was debug --- IGNORE ---
+
+# Frontend configuration for themes and UI customization
+frontend:
+  # Loads themes from the themes directory
+  themes: !include_dir_merge_named themes
+  extra_module_url:
+    - /local/community/custom-brand-icons/custom-brand-icons.js 
+  # - /local/community/lovelace-card-mod/card-mod.js # Commented module for custom cards
+
+
+# HTTP/Network security configuration
+http:
+  use_x_forwarded_for: true
+  # List of trusted network ranges and IPs
+  trusted_proxies:
+    - 192.168.1.1                # Synology NAS IP
+    - 172.30.33.4
+    - 172.30.33.0/24
+    - 127.0.0.1                  # Localhost
+    - 172.16.0.0/12
+    - ::1                        # IPv6 localhost
+  ip_ban_enabled: true           # Enable IP banning
+  login_attempts_threshold: 25    # Max login attempts before ban
+
+var: !include variables.yaml
+
+person: !include persons.yaml
+# Load and manage automations
+automation: !include_dir_merge_list automations/  # From directory
+automation UI: !include automations.yaml          # From UI
+
+# Load and manage scripts
+script: !include_dir_merge_named scripts/         # From directory
+script UI: !include scripts.yaml                  # From UI
+
+# Scene configuration
+scene: !include scenes.yaml
+
+# Load custom templates
+template: !include_dir_merge_list templates/
+
+# Alexa integration
+alexa: !include alexa.yaml
+
+# Media player configuration
+media_player: !include media_player.yaml
+
+# Light configuration
+light: !include light.yaml
+
+# Custom panel configuration
+panel_custom: !include panel-custom.yaml
+
+#group: !include groups.yaml
+
+# enable bkuetooth integration
+#bluetooth:
+#device_tracker:
+#  - platform: bluetooth_tracker
+#

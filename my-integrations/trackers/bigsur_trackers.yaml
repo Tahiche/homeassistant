@@ -1,0 +1,439 @@
+# user variables from var integrationnin case we chage the wifi network name
+# wifi names are in variables.yaml
+
+# https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
+# Not so binary blueprint...  
+input_select:
+  tahi_bigsur_status:
+    name: Tahi BigSur Status
+    icon: mdi:account
+    options:
+      - Home
+      - Just Arrived
+      - Just Left
+      - Away
+      - Extended Away
+    initial: Away
+  
+  noe_bigsur_status:
+    name: Noe BigSur Status
+    icon: mdi:account
+    options:
+      - Home
+      - Just Arrived
+      - Just Left
+      - Away
+      - Extended Away
+    initial: Away
+
+sensor:
+  - platform: template
+    sensors:
+      tahi_bigsur_status:
+        unique_id: tahi_bigsur_status
+        value_template: '{{ states.input_select.tahi_bigsur_status.state }}'
+        friendly_name: 'Tahi Bigsur'
+      noe_bigsur_status:
+        unique_id: noe_bigsur_status
+        value_template: '{{ states.input_select.noe_bigsur_status.state }}'
+        friendly_name: 'Noe BigSur'
+      bigsur_occupancy:
+        friendly_name: 'BigSur Occupancy Sensor'
+        unique_id: bigsur_occupancy
+        value_template: >-
+          {% if is_state('input_select.tahi_bigsur_status', 'Home') or is_state('input_select.noe_bigsur_status', 'Home') %}
+            Home
+          {% elif is_state('input_select.tahi_bigsur_status', 'Just Arrived') or is_state('input_select.noe_bigsur_status', 'Just Arrived') %}
+            Just Arrived
+          {% elif is_state('input_select.tahi_bigsur_status', 'Just Left') or is_state('input_select.noe_bigsur_status', 'Just Left') %}
+            Just Left
+          {% elif is_state('input_select.tahi_bigsur_status', 'Away') or is_state('input_select.noe_bigsur_status', 'Away') %}
+            Away
+          {% elif is_state('input_select.tahi_bigsur_status', 'Extended Away') or is_state('input_select.noe_bigsur_status', 'Extended Away') %}
+            Extended Away
+          {% else %}
+            Unknown
+          {% endif %}
+        icon_template: >-
+          {% if is_state('sensor.bigsur_occupancy', 'Home') %}
+            mdi:home-account
+          {% elif is_state('sensor.bigsur_occupancy', 'Just Arrived') %}
+            mdi:home-account
+          {% elif is_state('sensor.bigsur_occupancy', 'Just Left') %}
+            mdi:home-alert
+          {% elif is_state('sensor.bigsur_occupancy', 'Away') %}
+            mdi:home-off-outline
+          {% elif is_state('sensor.bigsur_occupancy', 'Extended Away') %}
+            mdi:home-off-outline
+          {% else %}
+            mdi:home-question
+          {% endif %}
+group:
+  bigsur_trackers:
+    - device_tracker.tracker_wifi_tahi
+    - device_tracker.tracker_wifi_noe
+    - device_tracker.tahi_phone
+    - device_tracker.noe_phone
+  bigsur_status:
+    name: BigSur Status
+    entities:
+      - sensor.tahi_bigsur_status
+      - sensor.noe_bigsur_status
+  # these sensors are supposed to report home or away... 
+  tahi_bigsur_device_sensors:
+    name: "Tahi BigSur Device Sensors"
+    entities:
+      - device_tracker.tahi_phone
+      - device_tracker.tracker_wifi_tahi
+  noe_bigsur_device_sensors:
+    name: "Noe BigSur Device Sensors"
+    entities:
+      - device_tracker.noe_phone
+      - device_tracker.tracker_wifi_noe
+
+template:
+  ####### BIG SUR
+  - sensor:
+      - name: "Tahi Phone Wifi connected BigSur"
+        unique_id: tahi_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
+        # instead od strict query we use in so it works with CasaMolino EXT, for example
+        state: >-
+          {% if states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+          connected
+          {% else %}
+          disconnected
+          {% endif %}
+        icon: >-
+          {% if states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+            mdi:home-account
+          {% else %}
+            mdi:home-off-outline
+          {% endif %}
+  - sensor:
+      - name: "Noe phone Wifi connected BigSur" 
+        unique_id: noe_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
+        # instead od strict query we use in so it works with CasaMolino EXT, for example
+        state: >-
+          {% if states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+          connected
+          {% else %}
+          disconnected
+          {% endif %}
+        icon: >-
+          {% if states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+            mdi:home-account
+          {% else %}
+            mdi:home-off-outline
+          {% endif %}
+
+automation:
+    # additional device tracker dynamically created
+  # based on binary_sensor presence template sensors to defeat Unifi wrapper logic
+  # https://community.home-assistant.io/t/is-there-a-way-to-use-a-binary-sensor-as-an-device-tracker/250665/2?u=tahiche
+  # We trun wifi-connected sensor into device_tracker so we can assign to person entity... 
+  # updates the device_tracker based on the wifi-connected sensor sets to "BigSur" or "not_home" if wifi coonected to BigSur
+  - id: wifi_bigsur_device_tracker_update_noetahi
+    alias: "Update presence Bigsur wifi device tracker  Tahi and Noe"
+    mode: queued
+    trigger:
+      - platform: state
+        entity_id: sensor.tahi_phone_wifi_connected_bigsur
+      - platform: state
+        entity_id: sensor.noe_phone_wifi_connected_bigsur
+    condition: []
+    action:
+      - service: device_tracker.see
+        data_template:
+          dev_id: >
+            {% if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_bigsur' %}
+              tracker_wifi_tahi
+            {% elif trigger.entity_id == 'sensor.noe_phone_wifi_connected_bigsur' %}
+              tracker_wifi_noe
+            {% else %}
+              tracker_wifi_unknown
+            {% endif %}
+          location_name: "{{ 'BigSur' if is_state(trigger.entity_id, 'connected') else 'not_home' }}"
+          source_type: "router"
+      #- service: persistent_notification.create
+      #  data_template:
+      #    title: >
+      #        {% if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_casaflores' %}
+      #          Tahi WiFi BigSur Tracker Debug
+      #        {% elif trigger.entity_id == 'sensor.noe_phone_wifi_connected_casaflores' %}
+      #          Noe WiFi BigSur Tracker Debug
+      #        {% endif %}
+      #    message: > 
+      #      {% set tracker = 'tracker_wifi_tahi' if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_bigsur' else 'tracker_wifi_noe' %}
+      #      "Tracker state for {{ tracker }} changed to:  {{ trigger.to_state.state }} connected?? {{ trigger.to_state.state=='connected' }}  {{ is_state(trigger.entity_id, 'connected') }}"
+      #    notification_id: "automation_bigsur_wifi_debug_{{ now().strftime('%Y%m%d%H%M%S') }}"
+#
+
+  # Update the input_select based on the device_tracker
+  - alias: BigSur Mark person as just arrived
+    id: bigsur_mark_person_as_just_arrived
+    trigger:
+      - platform: state
+        entity_id: 
+          - device_tracker.tracker_wifi_tahi
+          - device_tracker.tracker_wifi_noe
+          - device_tracker.tahi_phone
+          - device_tracker.noe_phone
+        from: 'not_home'
+        to: 'BigSur'
+    action:
+      - variables:
+          my_trigger_entity: "{{ trigger.entity_id|lower }}"
+          my_input_select: >
+            {% if 'tahi' in trigger.entity_id %}
+              input_select.tahi_bigsur_status
+            {% elif 'noe' in trigger.entity_id %}
+              input_select.noe_bigsur_status
+            {% endif %}
+      - service: persistent_notification.create
+        data_template:
+          title: > 
+            "Just Arrived Triggered by {{ my_trigger_entity }}"
+          message: |
+            "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
+            "Setting {{ my_input_select }} to Just Arrived states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}" 
+      - service: input_select.select_option
+        data_template:
+          entity_id: >
+            {{ my_input_select }}
+          option: >
+              {% if states(my_input_select) == 'Just Left' %}
+                Home
+              {% else %}
+                Just Arrived
+              {% endif %}
+  # Mark as home 5 minutes after just arrived
+  # Or if we go from just left to just arrived to not trigger home stuff when you were just home. 
+  - alias: BigSur Mark person as home
+    id: bigsur_mark_person_as_home
+    trigger:
+      - platform: state
+        entity_id: 
+          - input_select.tahi_bigsur_status
+          - input_select.noe_bigsur_status
+        to: 'Just Arrived'
+        for:
+          minutes: 5 # just arrived for 5 minutes, then mark as home
+      - platform: state
+        entity_id: 
+          - input_select.tahi_bigsur_status
+          - input_select.noe_bigsur_status
+        from: 'Just Left'
+        to: 'Just Arrived'
+    action:
+      - variables:
+          my_trigger_entity: "{{ trigger.entity_id|lower }}"
+          my_input_select: >
+            {% if 'tahi' in trigger.entity_id %}
+              input_select.tahi_bigsur_status
+            {% elif 'noe' in trigger.entity_id %}
+              input_select.noe_bigsur_status
+            {% endif %}
+      - service: input_select.select_option
+        data_template:
+          entity_id: >
+            {{ my_input_select }}
+          option: Home  
+      - service: persistent_notification.create
+        data_template:
+          title: > 
+            "BigSur Mark person as home Triggered by {{ my_trigger_entity }}"
+          message: |
+            "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
+            "Setting {{ my_input_select }} to Just Arrived states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}" 
+
+
+# Important one, we see when person stops being home...
+  - alias: BigSur Mark Mark person as just left
+    id: bigsur_mark_person_as_just_left
+    trigger:
+      - platform: state
+        entity_id: 
+          - device_tracker.tracker_wifi_tahi
+          - device_tracker.tracker_wifi_noe
+          - device_tracker.tahi_phone
+          - device_tracker.noe_phone
+        from: 'BigSur'
+        to: 
+          - <not connected> # this is the case when we are not connected to wifi
+          - not connected
+          - unknown
+          - not_home
+          - home # yes, if we go from GibSur to home, we mark as just left
+    # Optional check if any device_ytacvers are still on BigSur...
+    #condition: 
+    #  - condition: template
+    #    value_template: >
+    #      "{{ trigger.to_state.state not in ['unknown', 'not_home'] }}"
+    action:
+      - variables:
+          my_trigger_entity: "{{ trigger.entity_id|lower }}"
+          my_input_select: >
+            {% if 'tahi' in trigger.entity_id %}
+              input_select.tahi_bigsur_status
+            {% elif 'noe' in trigger.entity_id %}
+              input_select.noe_bigsur_status
+            {% endif %}
+      - service: input_select.select_option
+        data_template:
+          entity_id: >
+            {{ my_input_select }}
+          option: Just Left
+      - service: persistent_notification.create
+        data_template:
+          title: > 
+            "BigSur Mark person as just left Triggered by {{ my_trigger_entity }}"
+          message: |
+            "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
+            "Setting {{ my_input_select }} to Just Left states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}"
+  
+  
+  # we mark as away 5 minutes after just left 
+  - alias: BigSur Mark person as away
+    id: bigsur_mark_person_as_away
+    trigger:
+      - platform: state
+        entity_id: 
+          - input_select.tahi_bigsur_status
+          - input_select.noe_bigsur_status
+        to: 'Just Left'
+        for:
+          minutes: 5 # just left for 5 minutes, then mark as away
+    action:
+      - variables:
+          my_trigger_entity: "{{ trigger.entity_id|lower }}"
+          my_input_select: >
+            {% if 'tahi' in trigger.entity_id %}
+              input_select.tahi_bigsur_status
+            {% elif 'noe' in trigger.entity_id %}
+              input_select.noe_bigsur_status
+            {% endif %}
+      - service: input_select.select_option
+        data_template:
+          entity_id: >
+            {{ my_input_select }}
+          option: Away
+      - service: persistent_notification.create
+        data_template:
+          title: > 
+            "BigSur Mark person as away Triggered by {{ my_trigger_entity }}"
+          message: |
+            "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
+            "Setting {{ my_input_select }} to Away states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}"
+  - alias: Mark as extended away
+    id: bigsur_mark_person_as_extended_away
+    trigger:
+      - platform: state
+        entity_id: 
+          - input_select.tahi_bigsur_status
+          - input_select.noe_bigsur_status
+        to: 'Away'
+        for:
+         hours: 24 # away for 1 day, then mark as extended away
+    action:
+      - variables:
+          my_trigger_entity: "{{ trigger.entity_id|lower }}"
+          my_input_select: >
+            {% if 'tahi' in trigger.entity_id %}
+              input_select.tahi_bigsur_status
+            {% elif 'noe' in trigger.entity_id %}
+              input_select.noe_bigsur_status
+            {% endif %}
+      - service: input_select.select_option
+        data_template:
+          entity_id: >
+            {{ my_input_select }}
+          option: Extended Away
+      - service: persistent_notification.create
+        data_template:
+          title: > 
+            "BigSur Mark person as extended away Triggered by {{ my_trigger_entity }}"
+          message: |
+            "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
+            "Setting {{ my_input_select }} to Extended Away states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}"
+
+  #- id: update_bigsur_status
+  #  alias: "Update BigSur Status"
+  #  mode: queued
+  #  trigger:
+  #    - platform: state
+  #      entity_id: device_tracker.tracker_wifi_tahi
+  #    - platform: state
+  #      entity_id: device_tracker.tracker_wifi_noe
+  #  condition: []
+  #  action:
+  #    - service: input_select.select_option
+  #      target:
+  #        entity_id: input_select.tahi_bigsur_status
+  #      data_template:
+  #        option: >
+  #          {% if is_state('device_tracker.tracker_wifi_tahi', 'BigSur') %}
+  #            Home
+  #          {% elif is_state('device_tracker.tracker_wifi_tahi', 'not_home') %}
+  #            Away
+  #          {% else %}
+  #            Extended Away
+  #          {% endif %}
+  #    - service: input_select.select_option
+  #      target:
+  #        entity_id: input_select.noe_bigsur_status
+  #      data_template:
+  #        option: >
+  #          {% if is_state('device_tracker.tracker_wifi_noe', 'BigSur') %}
+  #            Home
+  #          {% elif is_state('device_tracker.tracker_wifi_noe', 'not_home') %}
+  #            Away
+  #          {% else %}
+  #            Extended Away
+  #          {% endif %}
+
+# https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
+# Not so binary blueprint...  
+
+  
+# lastras GPS coords: [40.3020089,-4.600871]
+# casaMolino GPS : [40.42415750701731, -3.70277613401413]
+
+script: 
+   # Sample script to simulate presence in Big Sur
+   simulate_presence_bigsur:
+     id: simulate_presence_bigsur
+     alias: "TEST - Simulate presence in Big Sur"
+     description: "Simulates that GPS is set to Big Sur coordinates"
+     mode: queued
+     sequence:
+       #- service: homeassistant.update_entity
+       #  target:
+       #    entity_id: 
+       #      - sensor.tahi_phone_wifi_connected_bigsur
+       #      - sensor.noe_phone_wifi_connected_bigsur
+       - service: device_tracker.see
+         data:
+           dev_id: tahi_phone
+           gps:
+             - 40.3020089
+             - -4.600871
+       #- service: device_tracker.see
+       #  data:
+       #    dev_id: "tracker_wifi_bigsur_noe"
+       #    location_name: "home"
+       #    source_type: "router"
+       - service: persistent_notification.create
+         data:
+           title: "Big Sur Presence Simulation"
+           message: "Successfully simulated gps to Big Sur for Tahi's phone"
+   #- id: mimic_bigsur_tahi_gps
+   #  alias: "TEST Tahi's phone GPS in BigSur for testing"
+   #  description: "Use device_tracker.see to set Tahi's phone GPS in BigSur for testing"
+   #  mode: queued
+   #  action: 
+   #    - service: device_tracker.see
+   #      data:
+   #        dev_id: tahi_phone
+   #        gps:
+   #          - 40.3020089
+   #          - -4.600871

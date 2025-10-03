@@ -1,0 +1,60 @@
+version: 4
+homeassistant:
+  enabled: true
+advanced:
+  network_key:
+    - 113
+    - 207
+    - 167
+    - 165
+    - 184
+    - 215
+    - 207
+    - 235
+    - 198
+    - 178
+    - 109
+    - 162
+    - 109
+    - 67
+    - 71
+    - 177
+  pan_id: 53979
+  ext_pan_id:
+    - 222
+    - 20
+    - 36
+    - 26
+    - 228
+    - 58
+    - 225
+    - 37
+mqtt:
+  server: mqtt://core-mosquitto:1883
+  user: addons
+  password: Eefe2aeshiuto0woo2aeY4eiSohrioF6Pifah4kieCheiNgeipa6Yoo8teeghoac
+frontend:
+  enabled: true
+  port: 8099
+serial:
+  adapter: zstack
+  port: >-
+    /dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_6a0c92f3e86aef11ba189fadc169b110-if00-port0
+devices:
+  '0x804b50fffe9e49ca':
+    friendly_name: IKEA Stybar remote 1
+  '0x0017880104cbe970':
+    friendly_name: Hue Philips lightbulb 1
+    description: SN - 1B25B8
+  '0x0017880104cbf50c':
+    friendly_name: Hue Philips lightbulb 2
+    description: SN - C48AFC
+  '0x84fd27fffe564db2':
+    friendly_name: IkeaPlug 1 Studio
+    description: SmartPlug ikea 1
+  '0x00124b002f895605':
+    friendly_name: Sonoff plug estudio ha
+    description: 'Plug sonoff en estudio Flowers '
+groups:
+  '1':
+    friendly_name: Estudio Lights

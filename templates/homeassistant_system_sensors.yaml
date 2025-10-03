@@ -1,0 +1,9 @@
+- sensor:
+  - name: HA not restarted recently
+    unique_id: home_assistant_not_restarted_recently
+    state: |-
+      {% if as_timestamp(states('sensor.uptime')) | float > 20 %}
+        true
+      {% else %}
+        false
+      {% endif %}

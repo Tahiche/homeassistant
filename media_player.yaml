@@ -1,0 +1,11 @@
+#- platform: yamaha # yamaha network receivers integration
+#  name: Yamaha RX-V483
+#  host: 192.168.1.30
+#  source_ignore:
+#    - "AUX"
+#    - "HDMI6"
+#  source_names:
+#    HDMI1: "ChromeCast"
+#    HDMI3: "SHIELD"
+#  zone_ignore:
+#    - "Zone_2"

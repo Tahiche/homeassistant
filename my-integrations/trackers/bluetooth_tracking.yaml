@@ -1,0 +1,22 @@
+# D-Bus Bluetooth Tracker V2 Configuration
+# DEPRECATED: This YAML configuration is no longer used
+# The integration has been migrated to config entries (UI-based configuration)
+# 
+# To configure the integration:
+# 1. Go to Settings -> Devices & Services -> Add Integration
+# 2. Search for "D-Bus Bluetooth Tracker V2"
+# 3. Configure via the UI with these devices:
+#    - Tahi Pixel Bluetooth: E8:D5:2B:1F:B7:34
+#    - Noe Pixel Bluetooth: FC:41:16:E3:48:72
+
+# OLD YAML CONFIGURATION (NOT USED ANYMORE):
+# device_tracker:
+#   - platform: dbus_bt_tracker_v2
+#     interval_seconds: 15
+#     consider_home: 90
+#     device_connect_timeout: 5
+#     devices:
+#       - mac: "E8:D5:2B:1F:B7:34"
+#         name: "Tahi Pixel Bluetooth"
+#       - mac: "FC:41:16:E3:48:72"
+#         name: "Noe Pixel Bluetooth"

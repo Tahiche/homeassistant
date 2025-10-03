@@ -1,0 +1,8 @@
+# prople added via yaml cannot be edited in ui
+# - name: Tahi
+#   id: Tahi
+#   device_trackers:
+#     - device_tracker.pixel_8a_tahi
+#     - device_tracker.tracker_wifi_tahi
+# - name: Noe
+#   id: noe

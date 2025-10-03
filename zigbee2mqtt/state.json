@@ -1,0 +1,40 @@
+{
+    "1": {
+        "state": "OFF"
+    },
+    "0x804b50fffe9e49ca": {
+        "battery": 95,
+        "update": {
+            "state": "idle",
+            "installed_version": 33816598,
+            "latest_version": 33816598
+        },
+        "linkquality": 126
+    },
+    "0x0017880104cbe970": {
+        "state": "ON",
+        "linkquality": 69,
+        "brightness": 254,
+        "power_on_behavior": "off"
+    },
+    "0x0017880104cbf50c": {
+        "brightness": 254,
+        "state": "OFF",
+        "power_on_behavior": "off",
+        "linkquality": 48
+    },
+    "0x84fd27fffe564db2": {
+        "state": "OFF",
+        "power_on_behavior": "off",
+        "update": {
+            "state": "idle",
+            "installed_version": 587765297,
+            "latest_version": 587765297
+        },
+        "linkquality": 129
+    },
+    "0x00124b002f895605": {
+        "state": "OFF",
+        "linkquality": 105
+    }
+}

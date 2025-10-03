@@ -1,0 +1,70 @@
+# First automation: Updates Alexa volume when the input_number slider changes
+- alias: Alexa Volume Device (last) via input update
+  description: 'Update volume in last_alexa devuce via input_number.alexa_volume_last value'
+  triggers:
+  # Trigger when the input_number.alexa_volume_last changes
+  - trigger: state
+    entity_id:
+    - input_number.alexa_volume_last
+  conditions: 
+    # Only run if the Alexa's current volume is different from the input slider
+    - alias: "Alexa volume changed external"
+      condition: template
+      value_template: >-
+        {% set last_alexa=states('sensor.last_alexa') %}
+        {% set volumeAlexa=state_attr(last_alexa, 'volume_level')*100 | float  %}
+        {% set volumeInput=states('input_number.alexa_volume_last') | float %}
+        {% if volumeAlexa != volumeInput %}
+        true
+        {% else %}
+        false
+        {% endif %}
+  actions:
+  # Set the Alexa volume to match the input slider value
+  - action: media_player.volume_set
+    metadata: {}
+    data_template:
+      volume_level: '{{states(''input_number.alexa_volume_last'') | int / 100}}'
+      entity_id: '{{ states(''sensor.last_alexa'') | string }}'
+  mode: single
+
+# Second automation: Updates the input slider when Alexa volume changes externally
+- alias: Alexa input volume external update
+  description: 'Update HA input input_number.alexa_volume_last when device last_alexa has changed if values are notbthe same'
+  variables:
+    # Define variables for easier access to states and attributes
+    alexa_last: "{{ states('sensor.last_alexa') }}"
+    alexa_volume_last: "{{ states('sensor.alexa_volume_last') }}"
+    volumeAlexa: "{{ state_attr(alexa_last, 'volume_level')*100 | float }}"
+    volumeInput: "{{ states('input_number.alexa_volume_last') | float }}"
+    alexa_players:
+      - media_player.echo_de_tahiche
+      - media_player.echo_dot_estudioflowers
+  triggers:
+  # Trigger when volume_level attribute changes on any Alexa device
+  - trigger: state
+    entity_id:
+    - media_player.echo_de_tahiche
+    - media_player.echo_dot_estudioflowers
+    attribute: volume_level
+
+  conditions: 
+    # Only run if the volume actually changed
+    - alias: "Alexa volume changed external"
+      condition: template
+      value_template: >-
+        {% set last_alexa=states('sensor.last_alexa') %}
+        {% set volumeAlexa=state_attr(last_alexa, 'volume_level')*100 | float  %}
+        {% set volumeInput=states('input_number.alexa_volume_last') | float %}
+        {% if volumeAlexa != volumeInput %}
+        true
+        {% else %}
+        false
+        {% endif %}
+
+  action:
+  # Update the input slider to match Alexa's volume
+  - service: input_number.set_value
+    data_template:
+      entity_id: input_number.alexa_volume_last
+      value: "{{ (state_attr(trigger.entity_id, 'volume_level') * 100) | int }}"

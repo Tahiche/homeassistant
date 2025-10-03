@@ -1,0 +1,88 @@
+# =============================================================================
+#  Tydom Heating Configuration
+#  This configuration sets up components for controlling heating through Tydom
+# =============================================================================
+#
+# Components:
+#
+# INPUT BOOLEAN:
+# - Creates a toggle input for Tydom heating control
+# - Used as the primary control state storage
+#
+# SWITCH:
+# - Template switch that interfaces with the input boolean
+# - Provides an interface for turning heating on/off
+# - Links to the input boolean for state management
+#
+# BINARY SENSOR:
+# - Template sensor that monitors heating state
+# - Translates input_boolean state to binary sensor values
+# - Uses door device class for compatibility
+#
+# Usage:
+# - The input boolean stores the actual state
+# - The template switch provides the control interface
+# - The binary sensor provides state monitoring
+#
+# Dependencies:
+# - Requires template integration
+# - Requires input_boolean integration
+
+# Tydom Heating
+
+# Uses legacy template platform
+# https://community.home-assistant.io/t/sensor-question-template-vs-platform-template/415596/2
+# https://www.home-assistant.io/integrations/template/
+
+input_boolean: 
+  alexa_ha_tydom_heat_plug_input:
+    name: "HA Tydom - Calefaccion Tydom Plug Input"
+    icon: "mdi:heat-wave"
+
+switch:
+  - platform: template
+    switches:
+      alexa_ha_tydom_heat_plug_switch:
+        friendly_name: "HA Tydom - Calefaccion Plug Switch"
+        unique_id: "ha_swicth_tydom_heat_plug"
+        turn_on:
+          service: input_boolean.turn_on
+          entity_id: input_boolean.alexa_ha_tydom_heat_plug_input
+        turn_off:
+          service: input_boolean.turn_off
+          entity_id: input_boolean.alexa_ha_tydom_heat_plug_input
+          
+# This is the sensor exposed to Alexa, alexa will see this as a door sensor and will be able to control it and use it in automations
+
+#binary_sensor:
+#  - platform: template
+#    sensors:
+#      alexa_ha_tydom_wifiplug_sensor_legacy:
+#          friendly_name: "HA - Calefaccion wifi Plug Sensor Legacy"
+#          device_class: door
+#          value_template: >
+#            {% if is_state('input_boolean.alexa_ha_tydom_heat_plug_input','on') %}
+#            on
+#            {% else %}
+#            off
+#            {% endif %}
+#  
+
+template:
+  - trigger:
+      - platform: state
+        entity_id: input_boolean.alexa_ha_tydom_heat_plug_input
+    # device_class: door added via customize for new HA versions templating.
+    binary_sensor:
+      - name: "HA - Calefaccion wifi Plug Sensor"
+        state: >
+          {% if is_state('input_boolean.alexa_ha_tydom_heat_plug_input','on') %}
+          on
+          {% else %}
+          off
+          {% endif %}
+        unique_id: alexa_ha_tydom_wifiplug_sensor
+  # just an example of how to use a template sensor to monitor 
+  - binary_sensor:
+      - name: "HA Has Unavailable States"
+        state: "{{ states.sensor | selectattr('state', 'in', ['unavailable', 'unknown', 'none']) | list | count }}"
