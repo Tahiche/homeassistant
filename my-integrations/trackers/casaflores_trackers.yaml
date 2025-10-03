@@ -30,71 +30,12 @@ switch:
             message: "CasaFlores Presence Switch turn_off called (read-only switch)"
             level: info
 
-# user variables from var integrationnin case we chage the wifi network name
-# wifi names are in variables.yaml
-template:
-  - trigger:
-      - platform: state
-        entity_id: sensor.tahi_phone_wi_fi_connection
-      - platform: homeassistant
-        event: start
-      - platform: event
-        event_type: event_template_reloaded
-    sensor:
-      - name: "Tahi Phone Wifi connected CasaFlores"
-        unique_id: tahi_phone_wifi_connected_casaflores # Unique ID is required for the UI, but is set by name
-        # instead od strict query we use in so it works with CasaMolino EXT, for example
-        state: >-
-          {% if states('sensor.tahi_phone_wi_fi_connection') == states('var.wifi_casaflores')
-          or states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_casaflores_array') %}
-          connected
-          {% else %}
-          disconnected
-          {% endif %}
-# try adding an attribute that changes so device tracker updates on restart
-        attributes:
-         ha_rand: >-
-           random-{{ range(1, 51) | random }}
-        icon: >-
-          {% if states('sensor.tahi_phone_wi_fi_connection') == states('var.wifi_casaflores')
-          or states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_casaflores_array') %}
-            mdi:home-account
-          {% else %}
-            mdi:home-off-outline
-          {% endif %}
-  - trigger:
-      - platform: state
-        entity_id: sensor.noe_pixel_8a_wi_fi_connection
-      - platform: homeassistant
-        event: start
-      - platform: event
-        event_type: event_template_reloaded
-    sensor:
-      - name: "Noe phone Wifi connected CasaFlores" 
-        unique_id: noe_phone_wifi_connected_casaflores # Unique ID is required for the UI, but is set by name
-        # instead od strict query we use in so it works with CasaMolino EXT, for example
-        state: >-
-          {% if states('sensor.noe_pixel_8a_wi_fi_connection') == states('var.wifi_casaflores')
-          or states('sensor.noe_pixel_8a_wi_fi_connection') in states('var.wifi_casaflores_array') %}
-          connected
-          {% else %}
-          disconnected
-          {% endif %}
-        attributes:
-         ha_rand: >-
-           random-{{ range(1, 51) | random }} 
-        icon: >-
-          {% if states('sensor.noe_pixel_8a_wi_fi_connection') == states('var.wifi_casaflores')
-          or states('sensor.noe_pixel_8a_wi_fi_connection') in states('var.wifi_casaflores_array') %}
-            mdi:home-account
-          {% else %}
-            mdi:home-off-outline
-          {% endif %}
-          
+
 # who is at casa...
 # chaks persons for ome state
 # id: sensor.casaflores_occupancy 
 # return: none home, some home, all home
+template:
   - sensor:
       - name: "CasaFlores Occupancy" 
         unique_id: casaflores_occupancy # Unique ID is required for the UI, but is set by name
@@ -131,12 +72,74 @@ template:
     binary_sensor:
       - name: "CasaFlores empty"
         state: >
-          {% if is_state('sensor.casaflores_occupancy','none home') %}
+          {% if is_state('sensor.casaflores_occupancy','empty home') %}
           on
           {% else %}
           off
           {% endif %}
         unique_id: casaflores_empty
+
+# user variables from var integrationnin case we chage the wifi network name
+# wifi names are in variables.yaml
+# template:
+#   - trigger:
+#       - platform: state
+#         entity_id: sensor.tahi_phone_wi_fi_connection
+#       - platform: homeassistant
+#         event: start
+#       - platform: event
+#         event_type: event_template_reloaded
+#     sensor:
+#       - name: "Tahi Phone Wifi connected CasaFlores"
+#         unique_id: tahi_phone_wifi_connected_casaflores # Unique ID is required for the UI, but is set by name
+#         # instead od strict query we use in so it works with CasaMolino EXT, for example
+#         state: >-
+#           {% if states('sensor.tahi_phone_wi_fi_connection') == states('var.wifi_casaflores')
+#           or states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_casaflores_array') %}
+#           connected
+#           {% else %}
+#           disconnected
+#           {% endif %}
+# # try adding an attribute that changes so device tracker updates on restart
+#         attributes:
+#          ha_rand: >-
+#            random-{{ range(1, 51) | random }}
+#         icon: >-
+#           {% if states('sensor.tahi_phone_wi_fi_connection') == states('var.wifi_casaflores')
+#           or states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_casaflores_array') %}
+#             mdi:home-account
+#           {% else %}
+#             mdi:home-off-outline
+#           {% endif %}
+#   - trigger:
+#       - platform: state
+#         entity_id: sensor.noe_pixel_8a_wi_fi_connection
+#       - platform: homeassistant
+#         event: start
+#       - platform: event
+#         event_type: event_template_reloaded
+#     sensor:
+#       - name: "Noe phone Wifi connected CasaFlores" 
+#         unique_id: noe_phone_wifi_connected_casaflores # Unique ID is required for the UI, but is set by name
+#         # instead od strict query we use in so it works with CasaMolino EXT, for example
+#         state: >-
+#           {% if states('sensor.noe_pixel_8a_wi_fi_connection') == states('var.wifi_casaflores')
+#           or states('sensor.noe_pixel_8a_wi_fi_connection') in states('var.wifi_casaflores_array') %}
+#           connected
+#           {% else %}
+#           disconnected
+#           {% endif %}
+#         attributes:
+#          ha_rand: >-
+#            random-{{ range(1, 51) | random }} 
+#         icon: >-
+#           {% if states('sensor.noe_pixel_8a_wi_fi_connection') == states('var.wifi_casaflores')
+#           or states('sensor.noe_pixel_8a_wi_fi_connection') in states('var.wifi_casaflores_array') %}
+#             mdi:home-account
+#           {% else %}
+#             mdi:home-off-outline
+#           {% endif %}
+          
 
 # additional device tracker dynamically created
 # based on binary_sensor presence template sensors to defeat Unifi wrapper logic
@@ -147,35 +150,35 @@ template:
 # {{ trigger.to_state.state=='connected' }} same as {{ is_state(trigger.entity_id, 'connected') }}"
 
 #{{ states('sensor.tahi_phone_wifi_connected_casaflores') }}
-automation:
-  - id: presence_based_wifi_home_noetahi
-    alias: "Update presence Home wifi device tracker  Tahi and Noe"
-    mode: queued
-    trigger:
-      - platform: state
-        entity_id: sensor.tahi_phone_wifi_connected_casaflores
-      - platform: state
-        entity_id: sensor.noe_phone_wifi_connected_casaflores
-    condition: []
-    action:
-      - service: device_tracker.see
-        data:
-          dev_id: >
-            {% if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_casaflores' %}
-              tracker_wifi_tahi
-            {% elif trigger.entity_id == 'sensor.noe_phone_wifi_connected_casaflores' %}
-              tracker_wifi_noe
-            {% else %}
-              tracker_wifi_unknown
-             {% endif %}
-          location_name: >
-            {% if is_state(trigger.entity_id, 'connected') %}
-            home
-            {%- else -%}
-            not_home
-            {%- endif -%}
+# automation:
+#   - id: presence_based_wifi_home_noetahi
+#     alias: "Update presence Home wifi device tracker  Tahi and Noe"
+#     mode: queued
+#     trigger:
+#       - platform: state
+#         entity_id: sensor.tahi_phone_wifi_connected_casaflores
+#       - platform: state
+#         entity_id: sensor.noe_phone_wifi_connected_casaflores
+#     condition: []
+#     action:
+#       - service: device_tracker.see
+#         data:
+#           dev_id: >
+#             {% if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_casaflores' %}
+#               tracker_wifi_tahi
+#             {% elif trigger.entity_id == 'sensor.noe_phone_wifi_connected_casaflores' %}
+#               tracker_wifi_noe
+#             {% else %}
+#               tracker_wifi_unknown
+#              {% endif %}
+#           location_name: >
+#             {% if is_state(trigger.entity_id, 'connected') %}
+#             home
+#             {%- else -%}
+#             not_home
+#             {%- endif -%}
             
-          source_type: "router"
+#           source_type: "router"
 
       #- service: persistent_notification.create
       #  data_template:
