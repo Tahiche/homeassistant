@@ -1,8 +1,8 @@
 smart_home:
   #locale: es-ES
   endpoint: https://api.eu.amazonalexa.com/v3/events
-  client_id: amzn1.application-oa2-client.7340bc566943456f9751fff16bab1418
-  client_secret: amzn1.oa2-cs.v1.36c14e1ba2294a8233e8e05ee056706c04758865631e5bb3c47e0033233f1d6a
+  client_id: !secret alexa_client_id
+  client_secret: !secret alexa_client_secret
   
   # FILTER WHAT IS EXPOSED TO ALEXA
   # https://www.home-assistant.io/integrations/alexa.smart_home
