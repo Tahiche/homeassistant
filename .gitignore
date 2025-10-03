@@ -154,3 +154,4 @@ glances/
 # Allow themes
 !themes/
 !themes/**/*.yaml
+zigbee2mqtt/state.json
