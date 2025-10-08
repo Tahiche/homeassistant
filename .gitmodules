@@ -1,0 +1,3 @@
+[submodule "custom_components/dbus_bt_tracker_v2"]
+	path = custom_components/dbus_bt_tracker_v2
+	url = git@github.com:Tahiche/ha_dbus_bt_tracker_v2.git
