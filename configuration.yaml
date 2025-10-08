@@ -11,6 +11,7 @@ homeassistant:
     #composite_trackers: !include my-integrations/trackers/composite_trackers.yaml
     tahi_bayesian_trackers: !include my-integrations/trackers/tahi_bayesian_composite.yaml
     noe_bayesian_trackers: !include my-integrations/trackers/noe_bayesian_composite.yaml
+    devices_and_automations: !include my-integrations/trackers/devices_and_automations.yaml
     # bluetooth_trackers: !include my-integrations/trackers/bluetooth_tracking.yaml  # Commented out - now using config entry
     config_helpers_alexa: !include my-integrations/config_helpers/alexa.yaml
     #bigsur_heating: !include_dir_named my-integrations/bigsur_heating

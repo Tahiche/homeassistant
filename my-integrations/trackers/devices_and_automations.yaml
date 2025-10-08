@@ -1,0 +1,50 @@
+automation:
+  # additional device tracker dynamically created
+  # based on binary_sensor presence template sensors to defeat Unifi wrapper logic
+  # https://community.home-assistant.io/t/is-there-a-way-to-use-a-binary-sensor-as-an-device-tracker/250665/2?u=tahiche
+  # We turn wifi-connected sensor into device_tracker so we can assign to person entity...
+
+  - id: wifi_presence_device_tracker_update_noetahi
+    alias: 'Update Presence tracker_wifi_* from Wi-Fi SSID  Tahi and Noe'
+    mode: queued
+    trigger:
+      - platform: state
+        entity_id: sensor.tahi_phone_wi_fi_connection
+      - platform: state
+        entity_id: sensor.noe_pixel_8a_wi_fi_connection
+    condition: []
+    action:
+      - service: device_tracker.see
+        data_template:
+          dev_id: >
+            {% if trigger.entity_id == 'sensor.tahi_phone_wi_fi_connection' %}
+              tracker_wifi_tahi
+            {% elif trigger.entity_id == 'sensor.noe_pixel_8a_wi_fi_connection' %}
+              tracker_wifi_noe
+            {% else %}
+              tracker_wifi_unknown
+            {% endif %}
+          # Use a choose action to check for different SSIDs
+          location_name: >
+            {% set current_ssid = trigger.to_state.state %}
+            {% if current_ssid in states('var.wifi_casaflores_array') %}
+              home
+            {% elif current_ssid in states('var.wifi_bigsur_array') %}
+              BigSur
+            {% else %}
+              not_home
+            {% endif %}
+          # location_name: "{{ 'BigSur' if is_state(trigger.entity_id, 'on') else 'not_home' }}"
+          source_type: "router"
+      #- service: persistent_notification.create
+      #  data_template:
+      #    title: >
+      #        {% if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_casaflores' %}
+      #          Tahi WiFi BigSur Tracker Debug
+      #        {% elif trigger.entity_id == 'sensor.noe_phone_wifi_connected_casaflores' %}
+      #          Noe WiFi BigSur Tracker Debug
+      #        {% endif %}
+      #    message: > 
+      #      {% set tracker = 'tracker_wifi_tahi' if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_bigsur' else 'tracker_wifi_noe' %}
+      #      "Tracker state for {{ tracker }} changed to:  {{ trigger.to_state.state }} connected?? {{ trigger.to_state.state=='connected' }}  {{ is_state(trigger.entity_id, 'connected') }}"
+      #    notification_id: "automation_bigsur_wifi_debug_{{ now().strftime('%Y%m%d%H%M%S') }}"

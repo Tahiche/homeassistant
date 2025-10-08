@@ -129,8 +129,8 @@ composite:
       entity_id:
         - binary_sensor.tahi_casa_bayesian_sensor
 
-    - name: Tahi Casa Composite All
-      id: tahi_casa_composite
+    - name: Tahi Composite All
+      id: tahi_composite_all
       entity_id:
         - device_tracker.tahi_phone
         - device_tracker.tracker_wifi_tahi
