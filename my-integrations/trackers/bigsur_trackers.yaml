@@ -177,46 +177,7 @@ switch:
 
 
 
-automation:
-    # additional device tracker dynamically created
-  # based on binary_sensor presence template sensors to defeat Unifi wrapper logic
-  # https://community.home-assistant.io/t/is-there-a-way-to-use-a-binary-sensor-as-an-device-tracker/250665/2?u=tahiche
-  # We trun wifi-connected sensor into device_tracker so we can assign to person entity... 
-  # updates the device_tracker based on the wifi-connected sensor sets to "BigSur" or "not_home" if wifi coonected to BigSur
-  - id: wifi_bigsur_device_tracker_update_noetahi
-    alias: "Update presence Bigsur wifi device tracker  Tahi and Noe"
-    mode: queued
-    trigger:
-      - platform: state
-        entity_id: sensor.tahi_phone_wifi_connected_bigsur
-      - platform: state
-        entity_id: sensor.noe_phone_wifi_connected_bigsur
-    condition: []
-    action:
-      - service: device_tracker.see
-        data_template:
-          dev_id: >
-            {% if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_bigsur' %}
-              tracker_wifi_tahi
-            {% elif trigger.entity_id == 'sensor.noe_phone_wifi_connected_bigsur' %}
-              tracker_wifi_noe
-            {% else %}
-              tracker_wifi_unknown
-            {% endif %}
-          location_name: "{{ 'BigSur' if is_state(trigger.entity_id, 'on') else 'not_home' }}"
-          source_type: "router"
-      #- service: persistent_notification.create
-      #  data_template:
-      #    title: >
-      #        {% if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_casaflores' %}
-      #          Tahi WiFi BigSur Tracker Debug
-      #        {% elif trigger.entity_id == 'sensor.noe_phone_wifi_connected_casaflores' %}
-      #          Noe WiFi BigSur Tracker Debug
-      #        {% endif %}
-      #    message: > 
-      #      {% set tracker = 'tracker_wifi_tahi' if trigger.entity_id == 'sensor.tahi_phone_wifi_connected_bigsur' else 'tracker_wifi_noe' %}
-      #      "Tracker state for {{ tracker }} changed to:  {{ trigger.to_state.state }} connected?? {{ trigger.to_state.state=='connected' }}  {{ is_state(trigger.entity_id, 'connected') }}"
-      #    notification_id: "automation_bigsur_wifi_debug_{{ now().strftime('%Y%m%d%H%M%S') }}"
+
 
 
 # https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408

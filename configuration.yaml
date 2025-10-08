@@ -53,7 +53,7 @@ http:
   ip_ban_enabled: true           # Enable IP banning
   login_attempts_threshold: 25    # Max login attempts before ban
 
-var: !include variables.yaml
+var: !include my-integrations/variables.yaml
 
 person: !include persons.yaml
 # Load and manage automations

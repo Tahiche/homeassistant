@@ -22,20 +22,21 @@ binary_sensor:
       - platform: template
         value_template: >
           {% set wifi_sensor = 'sensor.tahi_phone_wi_fi_connection' %}
-          {% set last_update = as_timestamp(now()) - as_timestamp(state_attr(wifi_sensor, 'last_updated')) %}
-          {{ states(wifi_sensor) in states('var.wifi_casaflores_array') and last_update < 900 }}
+          {{ states(wifi_sensor) in states('var.wifi_casaflores_array') }}
+        #  {% set last_update = as_timestamp(now()) - as_timestamp(state_attr(wifi_sensor, 'last_updated')) %}
+        #  {{ states(wifi_sensor) in states('var.wifi_casaflores_array') and last_update < 900 }}
 
         # High confidence for 'true' (if both conditions met)
-        prob_given_true: 0.95
+        prob_given_true: 0.8
         # Lower confidence for 'false' (it could still be home but the Wi-Fi just failed to update in 15 min)
-        prob_given_false: 0.40 
+        prob_given_false: 0.2
         
       # 3. Bluetooth Tracker (Good for in-home, still a strong indicator)
       - entity_id: 'device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34'
         platform: 'state'
         to_state: 'home'
-        prob_given_true: 0.90
-        prob_given_false: 0.30
+        prob_given_true: 0.95
+        prob_given_false: 0.05
 
 # Template sensor to add observed entity states as attributes
 
