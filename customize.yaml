@@ -13,3 +13,7 @@ group.bigsur_status:
 group.casa_residents:
   friendly_name: Casa Residents
   device_class: device_tracker
+binary_sensor.tahi_bigsur_bayesian_sensor:
+  friendly_name: "Tahi BigSur Bayesian Binary Sensor"
+binary_sensor.noe_bigsur_bayesian_sensor:
+  friendly_name: "Noe BigSur Bayesian Binary Sensor"

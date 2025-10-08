@@ -65,6 +65,7 @@ harmony_*.conf
 # Zigbee2MQTT
 zigbee2mqtt/log/
 zigbee2mqtt/database.db*
+zigbee2mqtt/state.json*
 
 # Custom component caches
 custom_components/**/__pycache__/
@@ -153,3 +154,4 @@ glances/
 # Allow themes
 !themes/
 !themes/**/*.yaml
+zigbee2mqtt/state.json

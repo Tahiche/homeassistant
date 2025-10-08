@@ -45,6 +45,7 @@ smart_home:
         - input_boolean.alert_when_high_processor_load
         - switch.ikeaplug_1_studio
         - switch.sonoff_plug_2_ha
+        - input_select.casaflores_presence_not_binary
         
       exclude_entities:
         - media_player.yamaha_receiver_family_room

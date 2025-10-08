@@ -197,7 +197,7 @@
     conditions:
     - condition: sun
       after: sunset
-      after_offset: 01:00
+      after_offset: 00:30
   - condition: or
     conditions:
     - condition: zone
@@ -344,3 +344,12 @@
     input:
       person_input_select: input_select.tahi_casa_status
       person_device_tracker: device_tracker.tahi_casa_composite_bayesian
+- id: '1759571828300'
+  alias: 'Modded Person: Status Update'
+  description: ''
+  use_blueprint:
+    path: Tahi-custom/Tahi-presence-not-binary-modded.yaml
+    input:
+      person_device_tracker: group.casaflores_residents
+      person_input_select: input_select.casaflores_presence_not_binary
+      time_till_marked_home: 5

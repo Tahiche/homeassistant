@@ -66,6 +66,38 @@ create_dev_branch() {
     return 0
 }
 
+# Function to perform git push with automatic SSH setup
+git_push() {
+    local branch="${1:-main}"
+    
+    echo -e "${YELLOW}Preparing to push to origin/$branch...${NC}"
+    
+    # Always start SSH agent and add key before pushing
+    echo -e "${YELLOW}Starting SSH agent...${NC}"
+    eval $(ssh-agent -s)
+    
+    echo -e "${YELLOW}Adding SSH key...${NC}"
+    ssh-add ~/.ssh/ha_id_rsa
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}✗ Failed to add SSH key${NC}"
+        return 1
+    fi
+    
+    echo -e "${GREEN}✓ SSH ready${NC}"
+    
+    # Perform git push
+    echo -e "${YELLOW}Pushing to origin/$branch...${NC}"
+    git push -u origin "$branch"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ Successfully pushed to origin/$branch${NC}"
+    else
+        echo -e "${RED}✗ Push failed${NC}"
+        return 1
+    fi
+}
+
 # Main menu function
 show_menu() {
     echo -e "\n${YELLOW}=== D-Bus Bluetooth Tracker Git Helper ===${NC}"
@@ -124,9 +156,10 @@ show_menu() {
     echo "2. Commit changes"
     echo "3. Create development branch"
     echo "4. Initialize SSH"
-    echo "5. Exit"
+    echo "5. Git push (with automatic SSH setup)"
+    echo "6. Exit"
     
-    read -p "Select an option (1-5): " choice
+    read -p "Select an option (1-6): " choice
     
     case $choice in
         1) check_component_status ;;
@@ -135,7 +168,9 @@ show_menu() {
         3) read -p "Enter branch name (without dev/ prefix): " branch_name
            create_dev_branch "$branch_name" ;;
         4) init_ssh ;;
-        5) echo "Exiting..." 
+        5) read -p "Enter branch name (default: main): " branch_name
+           git_push "${branch_name:-main}" ;;
+        6) echo "Exiting..." 
            exit 0 ;;
         *) echo -e "${RED}Invalid option${NC}" ;;
     esac
@@ -154,3 +189,11 @@ check_and_init_ssh() {
 
 # Run SSH check at script start
 check_and_init_ssh
+
+# Create a simple function for command line use
+gpush() {
+    eval $(ssh-agent -s) && ssh-add ~/.ssh/ha_id_rsa && git push -u origin "${1:-main}"
+}
+
+# Export the function so it can be used in the shell
+export -f gpush 2>/dev/null || true

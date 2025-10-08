@@ -142,11 +142,17 @@ notify_alexa_2:
   description: ''
 test_location_update_tahi_phone:
   sequence:
+  - data:
+      dev_id: tahi_phone
+      gps:
+      - 40.3020089
+      - -4.600871
+    action: device_tracker.see
   - action: notify.mobile_app_tahi_phone
     metadata: {}
     data:
       message: request_location_update
-  alias: TEST location update Tahi phone
+  alias: TEST location update Tahi phone set to BIGSUR GPS
   description: ''
 test_owntracks_location:
   sequence:
@@ -189,5 +195,8 @@ update_location_entities:
       - sensor.tahi_phone_wi_fi_connection
       - device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
       - device_tracker.noe_pixel_bluetooth_bt_fc_41_16_e3_48_72
+      - binary_sensor.noe_casa_bayesian_sensor
+      - binary_sensor.tahi_casa_bayesian_sensor
+      - group.casaflores_residents
   alias: Update Location Entities
   description: ''

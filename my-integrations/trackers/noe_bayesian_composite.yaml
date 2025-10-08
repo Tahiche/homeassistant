@@ -22,8 +22,9 @@ binary_sensor:
       - platform: template
         value_template: >
           {% set wifi_sensor = 'sensor.noe_pixel_8a_wi_fi_connection' %}
-          {% set last_update = as_timestamp(now()) - as_timestamp(state_attr(wifi_sensor, 'last_updated')) %}
-          {{ states(wifi_sensor) in states('var.wifi_casaflores_array') and last_update < 900 }}
+          {{ states(wifi_sensor) in states('var.wifi_casaflores_array') }}
+        #   {% set last_update = as_timestamp(now()) - as_timestamp(state_attr(wifi_sensor, 'last_updated')) %}
+        #   {{ states(wifi_sensor) in states('var.wifi_casaflores_array') and last_update < 900 }}
 
         # High confidence for 'true' (if both conditions met)
         prob_given_true: 0.95
