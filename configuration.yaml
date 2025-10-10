@@ -71,7 +71,7 @@ scene: !include scenes.yaml
 template: !include_dir_merge_list templates/
 
 # Alexa integration
-alexa: !include alexa.yaml
+alexa: !include my-integrations/alexa.yaml
 
 # Media player configuration
 media_player: !include media_player.yaml

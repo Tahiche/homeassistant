@@ -3,33 +3,3 @@
 
 #require_movement (Optional): true or false. If true, will skip update from a GPS-based tracker if it has not moved. Specifically, if circle defined by new GPS coordinates and accuracy overlaps circle defined by previous GPS coordinates and accuracy then update will be ignored.
 #driving_speed (Optional): Defines a driving speed threshold (in MPH or KPH, depending on general unit system setting.) If set, and current speed is at or above this value, and tracker is not in a zone, then the state of the tracker will be set to driving.
-
-composite:
-  default_options:
-    require_movement: true
-    driving_speed: 15
-  trackers:
-    - name: Tahi Casa Presence (Composite Bayesian)
-      id: tahi_casa_composite_bayesian
-      entity_id:
-        - binary_sensor.tahi_casa_bayesian_sensor
-
-    - name: Tahi Casa Composite All
-      id: tahi_casa_composite
-      entity_id:
-        - device_tracker.tahi_phone
-        - device_tracker.tracker_wifi_tahi
-        - device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
-    - name: Noe Casa Composite
-      id: noe_casa_composite
-      entity_id:
-        - device_tracker.noe_phone
-        - device_tracker.tracker_wifi_noe
-        - device_tracker.noe_pixel_bluetooth
-## If only non-GPS-based devices are in use, then the composite device will be 'home' 
-# if any of the watched devices are 'home'/'on', and will be 'not_home' only when all the watched devices are 'not_home'/'off'.
-    - name: Tahi Casa Composite Non-GPS Only
-      id: tahi_casa_composite_non_gps
-      entity_id:
-        - entity: device_tracker.tracker_wifi_tahi
-        - entity: device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34

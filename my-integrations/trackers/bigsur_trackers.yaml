@@ -1,85 +1,4 @@
-# user variables from var integrationnin case we chage the wifi network name
-# wifi names are in variables.yaml
 
-# if GPS OR WIFI are at bigsur, consider bigsur !!!
-# fixes some issues with bayesian.
-template:
-  - binary_sensor:
-      name: Tahi BigSur Presence Custom Binary
-      unique_id: tahi_bigsur_presence_custom_binary
-      state: |-
-        {% set HOME_ZONES = ['BigSur'] -%}
- 
-        {% set WIFI_SSIDS = states('var.wifi_bigsur_array')  -%} 
-        
-        {% set CURRENT_WIFI = states('sensor.tahi_phone_wi_fi_connection') -%}
-        {% set CURRENT_TRACKER = states('device_tracker.tahi_phone') -%}
-        {% set is_wifi_home = CURRENT_WIFI in WIFI_SSIDS -%}
-        {% set is_tracker_home = CURRENT_TRACKER in HOME_ZONES -%}
-          {# 🟢 ASSIGN FINAL STATE to a variable #}
-        {% set final_state = 'off' %}
-          
-        {% if is_wifi_home %}
-            {% set final_state = 'on' %}
-        {% elif is_tracker_home %}
-            {% set final_state = 'on' %}
-        {% endif %}
-        
-         {# 🟢 OUTPUT ONLY THE FINAL RESULT #}
-         {{  final_state }}
-         
-         # why variable force...
-         # this works {{ 'on' }}
-         # this fails is off {{ on }}
-         # just 'on' also fails... its off
-
-      attributes:
-        # Debugging Attributes
-        
-        home_ssids_list: "{{ states('var.wifi_bigsur_array') }}"
-        current_wifi: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"
-        current_tracker_zone: "{{ states('device_tracker.tahi_phone') }}"
-        
-        # Logic Flags
-        wifi_condition_met: "{{ states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array')  }}"
-        tracker_condition_met: "{{ states('device_tracker.tahi_phone') in  ['BigSur']  }}"
-
-  ####### BIG SUR
-  #### seee automation below to update device_tracker based on this sensor
-  # we create a sensor that is on when phone is connected to bigsur wifi, off when not
-  
-  - sensor:
-      - name: "Tahi Phone Wifi connected BigSur"
-        unique_id: tahi_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
-        # instead od strict query we use in so it works with CasaMolino EXT, for example
-        state: >-
-          {% if states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
-          on
-          {% else %}
-          off
-          {% endif %}
-        icon: >-
-          {% if states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
-            mdi:home-account
-          {% else %}
-            mdi:home-off-outline
-          {% endif %}
-  - sensor:
-      - name: "Noe phone Wifi connected BigSur" 
-        unique_id: noe_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
-        # instead od strict query we use in so it works with CasaMolino EXT, for example
-        state: >-
-          {% if states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
-          on
-          {% else %}
-          off
-          {% endif %}
-        icon: >-
-          {% if states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
-            mdi:home-account
-          {% else %}
-            mdi:home-off-outline
-          {% endif %}
 
         
 # Bayesian presence sensor integrating WiFi, Bluetooth and GPS
@@ -93,14 +12,14 @@ binary_sensor:
     unique_id: tahi_bigsur_bayesian_sensor
     name: tahi_bigsur_bayesian_sensor
     prior: 0.5
-    probability_threshold: 0.9
+    probability_threshold: 0.7  # Changed from 0.9 to 0.7 
     observations:
       # 1. GPS/Mobile App Tracker (The primary away indicator)
       #    We INCREASE the reliability (0.95) and the certainty of absence (0.20)
       - platform: 'template'
         value_template: "{{ is_state('device_tracker.tahi_phone', 'BigSur') }}"
-        prob_given_true: 0.99  # Increased confidence when GPS is 'home'
-        prob_given_false: 0.20 # Increased confidence when GPS is not 'home' (more weight to pull the probability down)
+        prob_given_true: 0.95  # Increased confidence when GPS is 'home'
+        prob_given_false: 0.05 # Increased confidence when GPS is not 'home' (more weight to pull the probability down)
 
       # 2. Wi-Fi Connection (The primary fast arrival indicator)
       #    We use probabilities that allow the GPS to dominate when Wi-Fi is "False" (not connected).
@@ -114,7 +33,7 @@ binary_sensor:
         # When FALSE (Not connected/Away/Disconnected): Low certainty. 
         # A 0.5 means 'no evidence either way'. A 0.6 is a slight pull AWAY from 'home'.
         # This LOW VALUE is the key to letting GPS dominate.
-        prob_given_false: 0.05  # <<-- Changed to a low value
+        prob_given_false: 0.4  # <<-- Changed to a low value
 
   - platform: bayesian
     unique_id: noe_bigsur_bayesian_sensor
@@ -127,8 +46,8 @@ binary_sensor:
       # 1. GPS/Mobile App Tracker (The primary away indicator)
       - platform: 'template'
         value_template: "{{ is_state('device_tracker.noe_phone', 'BigSur') }}"
-        prob_given_true: 0.85
-        prob_given_false: 0.15
+        prob_given_true: 0.95
+        prob_given_false: 0.05
   
       # 2. Wi-Fi Connection (The primary fast arrival indicator)
       #    We use a Template to ensure the Wi-Fi status is recent.
@@ -142,9 +61,9 @@ binary_sensor:
         #   {{ states(wifi_sensor) in states('var.wifi_bigsur_array') and last_update < 900 }}
 
         # High confidence for 'true' (if both conditions met)
-        prob_given_true: 0.95
+        prob_given_true: 0.90
         # Lower confidence for 'false' (it could still be home but the Wi-Fi just failed to update in 15 min)
-        prob_given_false: 0.40
+        prob_given_false: 0.4
 
 # In customize.yaml
 # customize:
@@ -172,113 +91,277 @@ switch:
           service: system_log.write
           data:
             message: "BigSur Presence Switch turn_off called (read-only switch)"
-            level: info    
+            level: info 
+  - platform: template
+    switches:
+      bigsur_extended_away_switch_ha:
+        unique_id: bigsur_extended_away_switch_ha
+        friendly_name: "HA BigSur Extended Away Switch"
+        value_template: >
+          {{ is_state('input_select.bigsur_status_select', 'Extended Away') }}
+        turn_on:
+          service: system_log.write
+          data:
+            message: "BigSur Extended Away Switch turn_on called (read-only switch)"
+            level: info
+        turn_off:
+          service: system_log.write
+          data:
+            message: "BigSur Extended Away Switch turn_off called (read-only switch)"
+            level: info   
+    
+sensor:
+  - platform: template
+    sensors:
+      bigsur_presence_sensor:
+        unique_id: bigsur_presence_sensor
+        friendly_name: "BigSur Presence Sensor"
+        value_template: >
+          {% if is_state('switch.bigsur_presence_switch_ha', 'on') %}
+            home
+          {% else %}
+            not_home
+          {% endif %}
+        icon_template: >
+          {% if is_state('switch.bigsur_presence_switch_ha', 'on') %}
+            mdi:home-account
+          {% else %}
+            mdi:home-off-outline
+          {% endif %}
+        attribute_templates:
+          persons: >
+            {% set persons = namespace(list=[]) %}
+            {% if is_state('binary_sensor.tahi_bigsur_bayesian_sensor', 'on') %}
+              {% set persons.list = persons.list + ['Tahi'] %}
+            {% endif %}
+            {% if is_state('binary_sensor.noe_bigsur_bayesian_sensor', 'on') %}
+              {% set persons.list = persons.list + ['Noe'] %}
+            {% endif %}
+            {{ persons.list | join(', ') if persons.list else 'None' }}
+          # Debugging Attributes
+          tahi_bigsur_bayesian: "{{ states('binary_sensor.tahi_bigsur_bayesian_sensor') }}"
+          noe_bigsur_bayesian: "{{ states('binary_sensor.noe_bigsur_bayesian_sensor') }}"
+          tahi_device_tracker: "{{ states('device_tracker.tahi_phone') }}"
+          noe_device_tracker: "{{ states('device_tracker.noe_phone') }}"
+          tahi_wifi: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"
+          noe_wifi: "{{ states('sensor.noe_pixel_8a_wi_fi_connection') }}"
+
+# https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
+# Not so binary blueprint...  
+input_select:
+  bigsur_status_select:
+    name: BigSur Status
+    icon: mdi:account
+    options:
+      - Home
+      - Just Arrived
+      - Just Left
+      - Away
+      - Extended Away
+    initial: Away
+
+automation:
+  - description: "Update not binary presence status for BigSur, using modded Tahi blueprint for not so binary presence"
+    alias: "BigSur not binary: Status Update"
+    id: bigsur_not_binary_status_update
+    use_blueprint:
+      path: Tahi-custom/Tahi-presence-not-binary-modded.yaml
+      input:
+        person_device_tracker: sensor.bigsur_presence_sensor
+        person_input_select: input_select.bigsur_status_select
+        time_till_marked_extended_away: 1  # hours
+        time_till_marked_away: 1 #make 5 minutes
+        time_till_marked_home: 3
 
 
+# user variables from var integrationnin case we chage the wifi network name
+# wifi names are in variables.yaml
 
+# if GPS OR WIFI are at bigsur, consider bigsur !!!
+# fixes some issues with bayesian.
+# template:
+#   - binary_sensor:
+#       name: Tahi BigSur Presence Custom Binary
+#       unique_id: tahi_bigsur_presence_custom_binary
+#       state: |-
+#         {% set HOME_ZONES = ['BigSur'] -%}
+ 
+#         {% set WIFI_SSIDS = states('var.wifi_bigsur_array')  -%} 
+        
+#         {% set CURRENT_WIFI = states('sensor.tahi_phone_wi_fi_connection') -%}
+#         {% set CURRENT_TRACKER = states('device_tracker.tahi_phone') -%}
+#         {% set is_wifi_home = CURRENT_WIFI in WIFI_SSIDS -%}
+#         {% set is_tracker_home = CURRENT_TRACKER in HOME_ZONES -%}
+#           {# 🟢 ASSIGN FINAL STATE to a variable #}
+#         {% set final_state = 'off' %}
+          
+#         {% if is_wifi_home %}
+#             {% set final_state = 'on' %}
+#         {% elif is_tracker_home %}
+#             {% set final_state = 'on' %}
+#         {% endif %}
+        
+#          {# 🟢 OUTPUT ONLY THE FINAL RESULT #}
+#          {{  final_state }}
+         
+#          # why variable force...
+#          # this works {{ 'on' }}
+#          # this fails is off {{ on }}
+#          # just 'on' also fails... its off
 
+#       attributes:
+#         # Debugging Attributes
+        
+#         home_ssids_list: "{{ states('var.wifi_bigsur_array') }}"
+#         current_wifi: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"
+#         current_tracker_zone: "{{ states('device_tracker.tahi_phone') }}"
+        
+#         # Logic Flags
+#         wifi_condition_met: "{{ states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array')  }}"
+#         tracker_condition_met: "{{ states('device_tracker.tahi_phone') in  ['BigSur']  }}"
+
+#   ####### BIG SUR
+#   #### seee automation below to update device_tracker based on this sensor
+#   # we create a sensor that is on when phone is connected to bigsur wifi, off when not
+  
+#   - sensor:
+#       - name: "Tahi Phone Wifi connected BigSur"
+#         unique_id: tahi_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
+#         # instead od strict query we use in so it works with CasaMolino EXT, for example
+#         state: >-
+#           {% if states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+#           on
+#           {% else %}
+#           off
+#           {% endif %}
+#         icon: >-
+#           {% if states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+#             mdi:home-account
+#           {% else %}
+#             mdi:home-off-outline
+#           {% endif %}
+#   - sensor:
+#       - name: "Noe phone Wifi connected BigSur" 
+#         unique_id: noe_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
+#         # instead od strict query we use in so it works with CasaMolino EXT, for example
+#         state: >-
+#           {% if states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+#           on
+#           {% else %}
+#           off
+#           {% endif %}
+#         icon: >-
+#           {% if states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_bigsur_array') %}
+#             mdi:home-account
+#           {% else %}
+#             mdi:home-off-outline
+#           {% endif %}
 
 
 
 # https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
 # Not so binary blueprint...  
-input_select:
-  bigsur_status:
-    name: Tahi BigSur Status
-    icon: mdi:account
-    options:
-      - Home
-      - Just Arrived
-      - Just Left
-      - Away
-      - Extended Away
-    initial: Away
-  tahi_bigsur_status:
-    name: Tahi BigSur Status
-    icon: mdi:account
-    options:
-      - Home
-      - Just Arrived
-      - Just Left
-      - Away
-      - Extended Away
-    initial: Away
+# input_select:
+#   bigsur_status_select:
+#     name: BigSur Status
+#     icon: mdi:account
+#     options:
+#       - Home
+#       - Just Arrived
+#       - Just Left
+#       - Away
+#       - Extended Away
+#     initial: Away
+#   tahi_bigsur_status:
+#     name: Tahi BigSur Status
+#     icon: mdi:account
+#     options:
+#       - Home
+#       - Just Arrived
+#       - Just Left
+#       - Away
+#       - Extended Away
+#     initial: Away
   
-  noe_bigsur_status:
-    name: Noe BigSur Status
-    icon: mdi:account
-    options:
-      - Home
-      - Just Arrived
-      - Just Left
-      - Away
-      - Extended Away
-    initial: Away
+#   noe_bigsur_status:
+#     name: Noe BigSur Status
+#     icon: mdi:account
+#     options:
+#       - Home
+#       - Just Arrived
+#       - Just Left
+#       - Away
+#       - Extended Away
+#     initial: Away
 
-sensor:
-  - platform: template
-    sensors:
-      tahi_bigsur_status:
-        unique_id: tahi_bigsur_status
-        value_template: '{{ states.input_select.tahi_bigsur_status.state }}'
-        friendly_name: 'Tahi Bigsur'
-      noe_bigsur_status:
-        unique_id: noe_bigsur_status
-        value_template: '{{ states.input_select.noe_bigsur_status.state }}'
-        friendly_name: 'Noe BigSur'
-      bigsur_occupancy:
-        friendly_name: 'BigSur Occupancy Sensor'
-        unique_id: bigsur_occupancy
-        value_template: >-
-          {% if is_state('input_select.tahi_bigsur_status', 'Home') or is_state('input_select.noe_bigsur_status', 'Home') %}
-            Home
-          {% elif is_state('input_select.tahi_bigsur_status', 'Just Arrived') or is_state('input_select.noe_bigsur_status', 'Just Arrived') %}
-            Just Arrived
-          {% elif is_state('input_select.tahi_bigsur_status', 'Just Left') or is_state('input_select.noe_bigsur_status', 'Just Left') %}
-            Just Left
-          {% elif is_state('input_select.tahi_bigsur_status', 'Away') or is_state('input_select.noe_bigsur_status', 'Away') %}
-            Away
-          {% elif is_state('input_select.tahi_bigsur_status', 'Extended Away') or is_state('input_select.noe_bigsur_status', 'Extended Away') %}
-            Extended Away
-          {% else %}
-            Unknown
-          {% endif %}
-        icon_template: >-
-          {% if is_state('sensor.bigsur_occupancy', 'Home') %}
-            mdi:home-account
-          {% elif is_state('sensor.bigsur_occupancy', 'Just Arrived') %}
-            mdi:home-account
-          {% elif is_state('sensor.bigsur_occupancy', 'Just Left') %}
-            mdi:home-alert
-          {% elif is_state('sensor.bigsur_occupancy', 'Away') %}
-            mdi:home-off-outline
-          {% elif is_state('sensor.bigsur_occupancy', 'Extended Away') %}
-            mdi:home-off-outline
-          {% else %}
-            mdi:home-question
-          {% endif %}
+# sensor:
+#   - platform: template
+#     sensors:
+#       tahi_bigsur_status:
+#         unique_id: tahi_bigsur_status
+#         value_template: '{{ states.input_select.tahi_bigsur_status.state }}'
+#         friendly_name: 'Tahi Bigsur'
+#       noe_bigsur_status:
+#         unique_id: noe_bigsur_status
+#         value_template: '{{ states.input_select.noe_bigsur_status.state }}'
+#         friendly_name: 'Noe BigSur'
+#       bigsur_occupancy:
+#         friendly_name: 'BigSur Occupancy Sensor'
+#         unique_id: bigsur_occupancy
+#         value_template: >-
+#           {% if is_state('input_select.tahi_bigsur_status', 'Home') or is_state('input_select.noe_bigsur_status', 'Home') %}
+#             Home
+#           {% elif is_state('input_select.tahi_bigsur_status', 'Just Arrived') or is_state('input_select.noe_bigsur_status', 'Just Arrived') %}
+#             Just Arrived
+#           {% elif is_state('input_select.tahi_bigsur_status', 'Just Left') or is_state('input_select.noe_bigsur_status', 'Just Left') %}
+#             Just Left
+#           {% elif is_state('input_select.tahi_bigsur_status', 'Away') or is_state('input_select.noe_bigsur_status', 'Away') %}
+#             Away
+#           {% elif is_state('input_select.tahi_bigsur_status', 'Extended Away') or is_state('input_select.noe_bigsur_status', 'Extended Away') %}
+#             Extended Away
+#           {% else %}
+#             Unknown
+#           {% endif %}
+#         icon_template: >-
+#           {% if is_state('sensor.bigsur_occupancy', 'Home') %}
+#             mdi:home-account
+#           {% elif is_state('sensor.bigsur_occupancy', 'Just Arrived') %}
+#             mdi:home-account
+#           {% elif is_state('sensor.bigsur_occupancy', 'Just Left') %}
+#             mdi:home-alert
+#           {% elif is_state('sensor.bigsur_occupancy', 'Away') %}
+#             mdi:home-off-outline
+#           {% elif is_state('sensor.bigsur_occupancy', 'Extended Away') %}
+#             mdi:home-off-outline
+#           {% else %}
+#             mdi:home-question
+#           {% endif %}
 group:
-  bigsur_trackers:
-    - device_tracker.tracker_wifi_tahi
-    - device_tracker.tracker_wifi_noe
-    - device_tracker.tahi_phone
-    - device_tracker.noe_phone
+  # bigsur_trackers:
+  #   - device_tracker.tracker_wifi_tahi
+  #   - device_tracker.tracker_wifi_noe
+  #   - device_tracker.tahi_phone
+  #   - device_tracker.noe_phone
   bigsur_group:
     name: BigSur group (TODO)
     entities:
-      - sensor.tahi_bigsur_status
-      - sensor.noe_bigsur_status
+      - binary_sensor.tahi_bigsur_bayesian_sensor
+      - binary_sensor.noe_bigsur_bayesian_sensor
+    icon: mdi:home-account
+    all: false  # true = all entities must be 'on', false = any entity 'on' makes group 'on'
+
+
   # these sensors are supposed to report home or away... 
-  tahi_bigsur_device_sensors:
-    name: "Tahi BigSur Device Sensors"
-    entities:
-      - device_tracker.tahi_phone
-      - device_tracker.tracker_wifi_tahi
-  noe_bigsur_device_sensors:
-    name: "Noe BigSur Device Sensors"
-    entities:
-      - device_tracker.noe_phone
-      - device_tracker.tracker_wifi_noe
+  # tahi_bigsur_device_sensors:
+  #   name: "Tahi BigSur Device Sensors"
+  #   entities:
+  #     - device_tracker.tahi_phone
+  #     - device_tracker.tracker_wifi_tahi
+  # noe_bigsur_device_sensors:
+  #   name: "Noe BigSur Device Sensors"
+  #   entities:
+  #     - device_tracker.noe_phone
+  #     - device_tracker.tracker_wifi_noe
 
 script: 
    # Sample script to simulate presence in Big Sur

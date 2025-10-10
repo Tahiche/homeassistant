@@ -146,7 +146,7 @@ test_location_update_tahi_phone:
       dev_id: tahi_phone
       gps:
       - 40.3020089
-      - -4.600871
+      - -4.600872
     action: device_tracker.see
   - action: notify.mobile_app_tahi_phone
     metadata: {}

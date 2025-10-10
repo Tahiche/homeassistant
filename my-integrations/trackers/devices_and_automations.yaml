@@ -3,6 +3,7 @@ automation:
   # based on binary_sensor presence template sensors to defeat Unifi wrapper logic
   # https://community.home-assistant.io/t/is-there-a-way-to-use-a-binary-sensor-as-an-device-tracker/250665/2?u=tahiche
   # We turn wifi-connected sensor into device_tracker so we can assign to person entity...
+  # We need this tracker so we can use the same wifi tracker for both zones, Casa (home) or BigSus (BigSur)
 
   - id: wifi_presence_device_tracker_update_noetahi
     alias: 'Update Presence tracker_wifi_* from Wi-Fi SSID  Tahi and Noe'
