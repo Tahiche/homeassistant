@@ -10,15 +10,15 @@ binary_sensor:
     probability_threshold: 0.9
     observations:
       # 1. GPS/Mobile App Tracker (The primary away indicator)
-      - platform: 'template'
-        value_template: "{{ is_state('device_tracker.tahi_phone', 'home') or is_state('device_tracker.tahi_phone', 'CasaFlores') }}"
+      - platform: "template"
+        value_template: "{{ is_state('device_tracker.tahi_phone_gps', 'home') or is_state('device_tracker.tahi_phone', 'CasaFlores') }}"
         prob_given_true: 0.85
         prob_given_false: 0.15
-  
+
       # 2. Wi-Fi Connection (The primary fast arrival indicator)
       #    We use a Template to ensure the Wi-Fi status is recent.
-      # Check if the Wi-Fi sensor shows the HOME SSID 
-        # AND has been updated in the last 15 minutes (900 seconds) 
+      # Check if the Wi-Fi sensor shows the HOME SSID
+      # AND has been updated in the last 15 minutes (900 seconds)
       - platform: template
         value_template: >
           {% set wifi_sensor = 'sensor.tahi_phone_wi_fi_connection' %}
@@ -30,11 +30,11 @@ binary_sensor:
         prob_given_true: 0.8
         # Lower confidence for 'false' (it could still be home but the Wi-Fi just failed to update in 15 min)
         prob_given_false: 0.2
-        
+
       # 3. Bluetooth Tracker (Good for in-home, still a strong indicator)
-      - entity_id: 'device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34'
-        platform: 'state'
-        to_state: 'home'
+      - entity_id: "device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34"
+        platform: "state"
+        to_state: "home"
         prob_given_true: 0.95
         prob_given_false: 0.05
 
@@ -67,7 +67,7 @@ sensor:
             {{ (last_update / 60) | round(1) }}
           # Core bayesian sensor info
           probability: "{{ state_attr('binary_sensor.tahi_casa_bayesian_sensor', 'probability') }}"
-         
+
           # States of observed entities
           gps_tracker_state: "{{ states('device_tracker.tahi_phone') }}"
           gps_tracker_last_changed: "{{ states.device_tracker.tahi_phone.last_changed }}"
@@ -82,25 +82,24 @@ sensor:
           wifi_last_update_minutes_ago: >
             {% set last_update = as_timestamp(now()) - as_timestamp(states.sensor.tahi_phone_wi_fi_connection.last_updated) %}
             {{ (last_update / 60) | round(1) }}
-          
+
           bluetooth_tracker_state: "{{ states('device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34') }}"
           bluetooth_tracker_last_changed: "{{ states.device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34.last_changed }}"
           bluetooth_tracker_last_updated_minutes_ago: >
             {% set last_update = as_timestamp(now()) - as_timestamp(states.device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34.last_updated) %}
             {{ (last_update / 60) | round(1) }}
-    
+
           # Summary of all entity states for quick reference
           entity_states_summary: >-
-            GPS: {{ states('device_tracker.tahi_phone') }} |
+            GPS: {{ states('device_tracker.tahi_phone_gps') }} |
             WiFi: {{ states('sensor.tahi_phone_wi_fi_connection') }} |
             Bluetooth: {{ states('device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34') }} |
 
           observations: "{{ state_attr('binary_sensor.tahi_casa_bayesian_sensor', 'observations') }}"
 
-
 # Note: NO 'homeassistant:' or 'packages:' header here
 switch:
-  - platform: template  # This is the "Legacy" format
+  - platform: template # This is the "Legacy" format
     switches:
       tahi_casa_presence_switch_ha:
         unique_id: tahi_casa_presence_switch_ha
@@ -117,8 +116,6 @@ switch:
           data:
             message: "Tahi Casa Presence Switch turn_off called (read-only switch)"
             level: info
-        
-
 
 #require_movement (Optional): true or false. If true, will skip update from a GPS-based tracker if it has not moved. Specifically, if circle defined by new GPS coordinates and accuracy overlaps circle defined by previous GPS coordinates and accuracy then update will be ignored.
 #driving_speed (Optional): Defines a driving speed threshold (in MPH or KPH, depending on general unit system setting.) If set, and current speed is at or above this value, and tracker is not in a zone, then the state of the tracker will be set to driving.
@@ -133,17 +130,13 @@ composite:
     - name: Tahi Composite All
       id: tahi_composite_all
       entity_id:
-        - device_tracker.tahi_phone
+        - device_tracker.tahi_phone_gps
         - device_tracker.tracker_wifi_tahi
         - device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
-## If only non-GPS-based devices are in use, then the composite device will be 'home' 
-# if any of the watched devices are 'home'/'on', and will be 'not_home' only when all the watched devices are 'not_home'/'off'.
+    ## If only non-GPS-based devices are in use, then the composite device will be 'home'
+    # if any of the watched devices are 'home'/'on', and will be 'not_home' only when all the watched devices are 'not_home'/'off'.
     - name: Tahi Casa Composite Non-GPS Only
       id: tahi_casa_composite_non_gps
       entity_id:
         - entity: device_tracker.tracker_wifi_tahi
         - entity: device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
-
-
-
-

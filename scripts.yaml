@@ -6,34 +6,34 @@ notify:
       title: Hello
       message: Notified
   alias: Notify
-  description: ''
+  description: ""
   icon: mdi:bell
 discover_weekly:
   sequence:
-  - action: media_player.select_source
-    target:
-      entity_id: media_player.spotify_noeliasastre
-    data:
-      source: Yamaha Flores
-  - action: media_player.play_media
-    data:
-      media:
-        media_content_id: spotify:playlist:37i9dQZEVXcU6cXzmZ5Ap5?si=4B2UlvOhSZKsU7VyRbnBmg
-        media_content_type: spotify://playlist
-        metadata:
-          title: Discover Weekly
-          thumbnail: https://pickasso.spotifycdn.com/image/ab67c0de0000deef/dt/v1/img/dw/cover/es
-          media_class: playlist
-          children_media_class: track
-          navigateIds:
-          - {}
-          - media_content_type: spotify://current_user_playlists
-            media_content_id: current_user_playlists
-          - media_content_type: spotify://playlist
-            media_content_id: spotify:playlist:37i9dQZEVXcU6cXzmZ5Ap5?si=4B2UlvOhSZKsU7VyRbnBmg
-          browse_entity_id: media_player.spotify_noeliasastre
-    target:
-      device_id: 9915d6d33bec417ec584151883f9bae2
+    - action: media_player.select_source
+      target:
+        entity_id: media_player.spotify_noeliasastre
+      data:
+        source: Yamaha Flores
+    - action: media_player.play_media
+      data:
+        media:
+          media_content_id: spotify:playlist:37i9dQZEVXcU6cXzmZ5Ap5?si=4B2UlvOhSZKsU7VyRbnBmg
+          media_content_type: spotify://playlist
+          metadata:
+            title: Discover Weekly
+            thumbnail: https://pickasso.spotifycdn.com/image/ab67c0de0000deef/dt/v1/img/dw/cover/es
+            media_class: playlist
+            children_media_class: track
+            navigateIds:
+              - {}
+              - media_content_type: spotify://current_user_playlists
+                media_content_id: current_user_playlists
+              - media_content_type: spotify://playlist
+                media_content_id: spotify:playlist:37i9dQZEVXcU6cXzmZ5Ap5?si=4B2UlvOhSZKsU7VyRbnBmg
+            browse_entity_id: media_player.spotify_noeliasastre
+      target:
+        device_id: 9915d6d33bec417ec584151883f9bae2
   alias: Discover Weekly Flowers
   description: Play Discover Weekly playlist in Yamaha RX-v483
   icon: mdi:music
@@ -46,123 +46,123 @@ away_notification:
       title: Turn OFF
       message: You left some things on?
       confirm_action:
-      - action: notify.alexa_media_echo_dot_estudioflowers
-        metadata: {}
-        data:
-          message: Turned OFF away
+        - action: notify.alexa_media_echo_dot_estudioflowers
+          metadata: {}
           data:
-            type: announce
+            message: Turned OFF away
+            data:
+              type: announce
       dismiss_action:
-      - action: notify.alexa_media_echo_dot_estudioflowers
-        metadata: {}
-        data:
-          message: Dismiss
+        - action: notify.alexa_media_echo_dot_estudioflowers
+          metadata: {}
           data:
-            type: announce
-  description: ''
+            message: Dismiss
+            data:
+              type: announce
+  description: ""
 calefaccion_lastras_16:
   sequence:
-  - device_id: f9b50d5d3e959283bae6cc698b30b9f4
-    domain: climate
-    entity_id: d3e8e0dc9d2d76002f469fbc7e38364a
-    type: set_hvac_mode
-    hvac_mode: heat
-    enabled: false
-  - action: climate.set_temperature
-    metadata: {}
-    data:
+    - device_id: f9b50d5d3e959283bae6cc698b30b9f4
+      domain: climate
+      entity_id: d3e8e0dc9d2d76002f469fbc7e38364a
+      type: set_hvac_mode
       hvac_mode: heat
-      temperature: 16
-    target:
-      entity_id:
-      - climate.calefaccion_lastras
-      - climate.calefaccion_bigsur
-  alias: 'Calefacción Lastras 16 '
-  description: ''
+      enabled: false
+    - action: climate.set_temperature
+      metadata: {}
+      data:
+        hvac_mode: heat
+        temperature: 16
+      target:
+        entity_id:
+          - climate.calefaccion_lastras
+          - climate.calefaccion_bigsur
+  alias: "Calefacción Lastras 16 "
+  description: ""
   icon: mdi:heat-wave
 calefaccion_lastras_off:
   sequence:
-  - device_id: f9b50d5d3e959283bae6cc698b30b9f4
-    domain: climate
-    entity_id: d3e8e0dc9d2d76002f469fbc7e38364a
-    type: set_hvac_mode
-    hvac_mode: 'off'
+    - device_id: f9b50d5d3e959283bae6cc698b30b9f4
+      domain: climate
+      entity_id: d3e8e0dc9d2d76002f469fbc7e38364a
+      type: set_hvac_mode
+      hvac_mode: "off"
   alias: Calefacción Lastras OFF
-  description: ''
+  description: ""
   icon: mdi:weather-sunny-alert
 calefaccion_switch_alexa_routine:
   sequence:
-  - action: notify.alexa_media
-    data:
-      message: Hola soy de Home Assistant
-      target: media_player.echo_dot_estudioflowers
+    - action: notify.alexa_media
       data:
-        type: tts
-    enabled: false
-  - action: media_player.play_media
-    data:
-      media_content_type: routine
-      media_content_id: Calefaccion Switch opens
-    target:
-      device_id: 923b336c230d1fe4899d87139a6750e8
+        message: Hola soy de Home Assistant
+        target: media_player.echo_dot_estudioflowers
+        data:
+          type: tts
+      enabled: false
+    - action: media_player.play_media
+      data:
+        media_content_type: routine
+        media_content_id: Calefaccion Switch opens
+      target:
+        device_id: 923b336c230d1fe4899d87139a6750e8
   alias: Calefacción lastras ON switch Alexa routine
-  description: ''
+  description: ""
   mode: restart
 calefaccion_lastras_off_switch_alexa_routine_2:
   sequence:
-  - action: notify.alexa_media
-    data:
-      message: Hola soy de Home Assistant
-      target: media_player.echo_dot_estudioflowers
+    - action: notify.alexa_media
       data:
-        type: tts
-    enabled: false
-  - action: media_player.play_media
-    data:
-      media_content_type: routine
-      media_content_id: HA Calefaccion switch closes
-    target:
-      device_id: 923b336c230d1fe4899d87139a6750e8
+        message: Hola soy de Home Assistant
+        target: media_player.echo_dot_estudioflowers
+        data:
+          type: tts
+      enabled: false
+    - action: media_player.play_media
+      data:
+        media_content_type: routine
+        media_content_id: HA Calefaccion switch closes
+      target:
+        device_id: 923b336c230d1fe4899d87139a6750e8
   alias: Calefacción lastras OFF switch Alexa routine
-  description: ''
+  description: ""
   mode: restart
 blink_camera_1:
   sequence:
-  - action: blink.trigger_camera
-    metadata: {}
-    data: {}
-    target:
-      entity_id: camera.blink_camera_entrada
+    - action: blink.trigger_camera
+      metadata: {}
+      data: {}
+      target:
+        entity_id: camera.blink_camera_entrada
   alias: Blink camera 1
-  description: ''
+  description: ""
 notify_alexa_2:
   alias: Notify Alexa
   use_blueprint:
     path: TheAppleFreak/notify_alexa.yaml
-  description: ''
+  description: ""
 test_location_update_tahi_phone:
   sequence:
-  - data:
-      dev_id: tahi_phone
-      gps:
-      - 40.3020089
-      - -4.600872
-    action: device_tracker.see
-  - action: notify.mobile_app_tahi_phone
-    metadata: {}
-    data:
-      message: request_location_update
+    - data:
+        dev_id: tahi_phone
+        gps:
+          - 40.3020089
+          - -4.600872
+      action: device_tracker.see
+    - action: notify.mobile_app_tahi_phone
+      metadata: {}
+      data:
+        message: request_location_update
   alias: TEST location update Tahi phone set to BIGSUR GPS
-  description: ''
+  description: ""
 test_owntracks_location:
   sequence:
-  - action: device_tracker.see
-    metadata: {}
-    data:
-      dev_id: '{{ trackers }}'
-      gps:
-      - ' {{ location.latitude }}'
-      - ' {{ location.longitude }}'
+    - action: device_tracker.see
+      metadata: {}
+      data:
+        dev_id: "{{ trackers }}"
+        gps:
+          - " {{ location.latitude }}"
+          - " {{ location.longitude }}"
   fields:
     location:
       selector:
@@ -175,28 +175,28 @@ test_owntracks_location:
         select:
           multiple: false
           options:
-          - tahi_owntracks
-          - tahi_phone
-          - noe_phone
+            - tahi_owntracks
+            - tahi_phone
+            - noe_phone
       required: true
       default: tahi_owntracks
   alias: TEST Owntracks location
-  description: ''
+  description: ""
 update_location_entities:
   sequence:
-  - action: homeassistant.update_entity
-    metadata: {}
-    data:
-      entity_id:
-      - device_tracker.tahi_phone
-      - device_tracker.noe_phone
-      - device_tracker.tahi_owntracks
-      - sensor.noe_pixel_8a_wi_fi_connection
-      - sensor.tahi_phone_wi_fi_connection
-      - device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
-      - device_tracker.noe_pixel_bluetooth_bt_fc_41_16_e3_48_72
-      - binary_sensor.noe_casa_bayesian_sensor
-      - binary_sensor.tahi_casa_bayesian_sensor
-      - group.casaflores_residents
+    - action: homeassistant.update_entity
+      metadata: {}
+      data:
+        entity_id:
+          - device_tracker.tahi_phone_gps
+          - device_tracker.noe_phone
+          - device_tracker.tahi_owntracks
+          - sensor.noe_pixel_8a_wi_fi_connection
+          - sensor.tahi_phone_wi_fi_connection
+          - device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
+          - device_tracker.noe_pixel_bluetooth_bt_fc_41_16_e3_48_72
+          - binary_sensor.noe_casa_bayesian_sensor
+          - binary_sensor.tahi_casa_bayesian_sensor
+          - group.casaflores_residents
   alias: Update Location Entities
-  description: ''
+  description: ""

@@ -1,25 +1,22 @@
-
-
-        
 # Bayesian presence sensor integrating WiFi, Bluetooth and GPS
 # Place this in your configuration.yaml or in the appropriate sensors folder
 # Bayesian sensor for person presence detection
 
-# in bayesian amd ityee canmot set entity_id in code,, it is derived from name. 
-# so set name to spdesired entiyy_id and set friendly name in cutomize. 
+# in bayesian amd ityee canmot set entity_id in code,, it is derived from name.
+# so set name to spdesired entiyy_id and set friendly name in cutomize.
 binary_sensor:
   - platform: bayesian
     unique_id: tahi_bigsur_bayesian_sensor
     name: tahi_bigsur_bayesian_sensor
     prior: 0.5
-    probability_threshold: 0.7  # Changed from 0.9 to 0.7 
+    probability_threshold: 0.7 # Changed from 0.9 to 0.7
     observations:
       # 1. GPS/Mobile App Tracker (The primary away indicator)
       #    We INCREASE the reliability (0.95) and the certainty of absence (0.20)
-      - platform: 'template'
-        value_template: "{{ is_state('device_tracker.tahi_phone', 'BigSur') }}"
-        prob_given_true: 0.95  # Increased confidence when GPS is 'home'
-        prob_given_false: 0.05 # Increased confidence when GPS is not 'home' (more weight to pull the probability down)
+      - platform: "template"
+        value_template: "{{ is_state('device_tracker.tahi_phone_gps', 'BigSur') }}"
+        prob_given_true: 0.90 # Increased confidence when GPS is 'home'
+        prob_given_false: 0.3 # Increased confidence when GPS is not 'home' (more weight to pull the probability down)
 
       # 2. Wi-Fi Connection (The primary fast arrival indicator)
       #    We use probabilities that allow the GPS to dominate when Wi-Fi is "False" (not connected).
@@ -27,13 +24,13 @@ binary_sensor:
         value_template: >
           {% set wifi_sensor = 'sensor.tahi_phone_wi_fi_connection' %}
           {{ states(wifi_sensor) in states('var.wifi_bigsur_array') }}
-        
+
         # When TRUE (Connected to HOME Wi-Fi): Extremely high confidence for 'home'
-        prob_given_true: 0.90 
-        # When FALSE (Not connected/Away/Disconnected): Low certainty. 
+        prob_given_true: 0.99
+        # When FALSE (Not connected/Away/Disconnected): Low certainty.
         # A 0.5 means 'no evidence either way'. A 0.6 is a slight pull AWAY from 'home'.
         # This LOW VALUE is the key to letting GPS dominate.
-        prob_given_false: 0.4  # <<-- Changed to a low value
+        prob_given_false: 0.05 # <<-- Changed to a low value
 
   - platform: bayesian
     unique_id: noe_bigsur_bayesian_sensor
@@ -44,15 +41,15 @@ binary_sensor:
     probability_threshold: 0.9
     observations:
       # 1. GPS/Mobile App Tracker (The primary away indicator)
-      - platform: 'template'
+      - platform: "template"
         value_template: "{{ is_state('device_tracker.noe_phone', 'BigSur') }}"
         prob_given_true: 0.95
         prob_given_false: 0.05
-  
+
       # 2. Wi-Fi Connection (The primary fast arrival indicator)
       #    We use a Template to ensure the Wi-Fi status is recent.
-      # Check if the Wi-Fi sensor shows the HOME SSID 
-        # AND has been updated in the last 15 minutes (900 seconds) 
+      # Check if the Wi-Fi sensor shows the HOME SSID
+      # AND has been updated in the last 15 minutes (900 seconds)
       - platform: template
         value_template: >
           {% set wifi_sensor = 'sensor.noe_pixel_8a_wi_fi_connection' %}
@@ -71,9 +68,9 @@ binary_sensor:
 #     friendly_name: "Tahi BigSur Bayesian Binary Sensor"
 #   binary_sensor.noe_bigsur_bayesian_sensor:
 #     friendly_name: "Noe BigSur Bayesian Binary Sensor"
-      
+
 switch:
-  - platform: template  # This is the "Legacy" format
+  - platform: template # This is the "Legacy" format
     switches:
       bigsur_presence_switch_ha:
         unique_id: bigsur_presence_switch_ha
@@ -91,7 +88,7 @@ switch:
           service: system_log.write
           data:
             message: "BigSur Presence Switch turn_off called (read-only switch)"
-            level: info 
+            level: info
   - platform: template
     switches:
       bigsur_extended_away_switch_ha:
@@ -108,8 +105,8 @@ switch:
           service: system_log.write
           data:
             message: "BigSur Extended Away Switch turn_off called (read-only switch)"
-            level: info   
-    
+            level: info
+
 sensor:
   - platform: template
     sensors:
@@ -141,13 +138,13 @@ sensor:
           # Debugging Attributes
           tahi_bigsur_bayesian: "{{ states('binary_sensor.tahi_bigsur_bayesian_sensor') }}"
           noe_bigsur_bayesian: "{{ states('binary_sensor.noe_bigsur_bayesian_sensor') }}"
-          tahi_device_tracker: "{{ states('device_tracker.tahi_phone') }}"
+          tahi_device_tracker: "{{ states('device_tracker.tahi_phone_gps') }}"
           noe_device_tracker: "{{ states('device_tracker.noe_phone') }}"
           tahi_wifi: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"
           noe_wifi: "{{ states('sensor.noe_pixel_8a_wi_fi_connection') }}"
 
 # https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
-# Not so binary blueprint...  
+# Not so binary blueprint...
 input_select:
   bigsur_status_select:
     name: BigSur Status
@@ -169,10 +166,9 @@ automation:
       input:
         person_device_tracker: sensor.bigsur_presence_sensor
         person_input_select: input_select.bigsur_status_select
-        time_till_marked_extended_away: 1  # hours
+        time_till_marked_extended_away: 1 # hours
         time_till_marked_away: 1 #make 5 minutes
         time_till_marked_home: 3
-
 
 # user variables from var integrationnin case we chage the wifi network name
 # wifi names are in variables.yaml
@@ -185,25 +181,25 @@ automation:
 #       unique_id: tahi_bigsur_presence_custom_binary
 #       state: |-
 #         {% set HOME_ZONES = ['BigSur'] -%}
- 
-#         {% set WIFI_SSIDS = states('var.wifi_bigsur_array')  -%} 
-        
+
+#         {% set WIFI_SSIDS = states('var.wifi_bigsur_array')  -%}
+
 #         {% set CURRENT_WIFI = states('sensor.tahi_phone_wi_fi_connection') -%}
-#         {% set CURRENT_TRACKER = states('device_tracker.tahi_phone') -%}
+#         {% set CURRENT_TRACKER = states('device_tracker.tahi_phone_gps') -%}
 #         {% set is_wifi_home = CURRENT_WIFI in WIFI_SSIDS -%}
 #         {% set is_tracker_home = CURRENT_TRACKER in HOME_ZONES -%}
 #           {# 🟢 ASSIGN FINAL STATE to a variable #}
 #         {% set final_state = 'off' %}
-          
+
 #         {% if is_wifi_home %}
 #             {% set final_state = 'on' %}
 #         {% elif is_tracker_home %}
 #             {% set final_state = 'on' %}
 #         {% endif %}
-        
+
 #          {# 🟢 OUTPUT ONLY THE FINAL RESULT #}
 #          {{  final_state }}
-         
+
 #          # why variable force...
 #          # this works {{ 'on' }}
 #          # this fails is off {{ on }}
@@ -211,19 +207,19 @@ automation:
 
 #       attributes:
 #         # Debugging Attributes
-        
+
 #         home_ssids_list: "{{ states('var.wifi_bigsur_array') }}"
 #         current_wifi: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"
-#         current_tracker_zone: "{{ states('device_tracker.tahi_phone') }}"
-        
+#         current_tracker_zone: "{{ states('device_tracker.tahi_phone_gps') }}"
+
 #         # Logic Flags
 #         wifi_condition_met: "{{ states('sensor.tahi_phone_wi_fi_connection') in states('var.wifi_bigsur_array')  }}"
-#         tracker_condition_met: "{{ states('device_tracker.tahi_phone') in  ['BigSur']  }}"
+#         tracker_condition_met: "{{ states('device_tracker.tahi_phone_gps') in  ['BigSur']  }}"
 
 #   ####### BIG SUR
 #   #### seee automation below to update device_tracker based on this sensor
 #   # we create a sensor that is on when phone is connected to bigsur wifi, off when not
-  
+
 #   - sensor:
 #       - name: "Tahi Phone Wifi connected BigSur"
 #         unique_id: tahi_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
@@ -241,7 +237,7 @@ automation:
 #             mdi:home-off-outline
 #           {% endif %}
 #   - sensor:
-#       - name: "Noe phone Wifi connected BigSur" 
+#       - name: "Noe phone Wifi connected BigSur"
 #         unique_id: noe_phone_wifi_connected_bigsur # Unique ID is required for the UI, but is set by name
 #         # instead od strict query we use in so it works with CasaMolino EXT, for example
 #         state: >-
@@ -257,10 +253,8 @@ automation:
 #             mdi:home-off-outline
 #           {% endif %}
 
-
-
 # https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
-# Not so binary blueprint...  
+# Not so binary blueprint...
 # input_select:
 #   bigsur_status_select:
 #     name: BigSur Status
@@ -282,7 +276,7 @@ automation:
 #       - Away
 #       - Extended Away
 #     initial: Away
-  
+
 #   noe_bigsur_status:
 #     name: Noe BigSur Status
 #     icon: mdi:account
@@ -340,7 +334,7 @@ group:
   # bigsur_trackers:
   #   - device_tracker.tracker_wifi_tahi
   #   - device_tracker.tracker_wifi_noe
-  #   - device_tracker.tahi_phone
+  #   - device_tracker.tahi_phone_gps_gps
   #   - device_tracker.noe_phone
   bigsur_group:
     name: BigSur group (TODO)
@@ -348,14 +342,13 @@ group:
       - binary_sensor.tahi_bigsur_bayesian_sensor
       - binary_sensor.noe_bigsur_bayesian_sensor
     icon: mdi:home-account
-    all: false  # true = all entities must be 'on', false = any entity 'on' makes group 'on'
+    all: false # true = all entities must be 'on', false = any entity 'on' makes group 'on'
 
-
-  # these sensors are supposed to report home or away... 
+  # these sensors are supposed to report home or away...
   # tahi_bigsur_device_sensors:
   #   name: "Tahi BigSur Device Sensors"
   #   entities:
-  #     - device_tracker.tahi_phone
+  #     - device_tracker.tahi_phone_gps
   #     - device_tracker.tracker_wifi_tahi
   # noe_bigsur_device_sensors:
   #   name: "Noe BigSur Device Sensors"
@@ -363,47 +356,45 @@ group:
   #     - device_tracker.noe_phone
   #     - device_tracker.tracker_wifi_noe
 
-script: 
-   # Sample script to simulate presence in Big Sur
-   simulate_presence_bigsur:
-     id: simulate_presence_bigsur
-     alias: "TEST BigSur - Simulate presence in Big Sur"
-     description: "Simulates that Tahi GPS is set to Big Sur coordinates"
-     mode: queued
-     sequence:
-       #- service: homeassistant.update_entity
-       #  target:
-       #    entity_id: 
-       #      - sensor.tahi_phone_wifi_connected_bigsur
-       #      - sensor.noe_phone_wifi_connected_bigsur
-       - service: device_tracker.see
-         data:
-           dev_id: tahi_phone
-           gps:
-             - 40.3020089
-             - -4.600871
-       #- service: device_tracker.see
-       #  data:
-       #    dev_id: "tracker_wifi_bigsur_noe"
-       #    location_name: "home"
-       #    source_type: "router"
-       - service: persistent_notification.create
-         data:
-           title: "Big Sur Presence Simulation"
-           message: "Successfully simulated gps to Big Sur for Tahi's phone"
-   #- id: mimic_bigsur_tahi_gps
-   #  alias: "TEST Tahi's phone GPS in BigSur for testing"
-   #  description: "Use device_tracker.see to set Tahi's phone GPS in BigSur for testing"
-   #  mode: queued
-   #  action: 
-   #    - service: device_tracker.see
-   #      data:
-   #        dev_id: tahi_phone
-   #        gps:
-   #          - 40.3020089
-   #          - -4.600871
-
-
+script:
+  # Sample script to simulate presence in Big Sur
+  simulate_presence_bigsur:
+    id: simulate_presence_bigsur
+    alias: "TEST BigSur - Simulate presence in Big Sur"
+    description: "Simulates that Tahi GPS is set to Big Sur coordinates"
+    mode: queued
+    sequence:
+      #- service: homeassistant.update_entity
+      #  target:
+      #    entity_id:
+      #      - sensor.tahi_phone_wifi_connected_bigsur
+      #      - sensor.noe_phone_wifi_connected_bigsur
+      - service: device_tracker.see
+        data:
+          dev_id: tahi_phone
+          gps:
+            - 40.3020089
+            - -4.600871
+      #- service: device_tracker.see
+      #  data:
+      #    dev_id: "tracker_wifi_bigsur_noe"
+      #    location_name: "home"
+      #    source_type: "router"
+      - service: persistent_notification.create
+        data:
+          title: "Big Sur Presence Simulation"
+          message: "Successfully simulated gps to Big Sur for Tahi's phone"
+  #- id: mimic_bigsur_tahi_gps
+  #  alias: "TEST Tahi's phone GPS in BigSur for testing"
+  #  description: "Use device_tracker.see to set Tahi's phone GPS in BigSur for testing"
+  #  mode: queued
+  #  action:
+  #    - service: device_tracker.see
+  #      data:
+  #        dev_id: tahi_phone
+  #        gps:
+  #          - 40.3020089
+  #          - -4.600871
 # #
 
 #   # Update the input_select based on the device_tracker
@@ -411,10 +402,10 @@ script:
 #     id: bigsur_mark_person_as_just_arrived
 #     trigger:
 #       - platform: state
-#         entity_id: 
+#         entity_id:
 #           - device_tracker.tracker_wifi_tahi
 #           - device_tracker.tracker_wifi_noe
-#           - device_tracker.tahi_phone
+#           - device_tracker.tahi_phone_gps
 #           - device_tracker.noe_phone
 #         from: 'not_home'
 #         to: 'BigSur'
@@ -429,11 +420,11 @@ script:
 #             {% endif %}
 #       - service: persistent_notification.create
 #         data_template:
-#           title: > 
+#           title: >
 #             "Just Arrived Triggered by {{ my_trigger_entity }}"
 #           message: |
 #             "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
-#             "Setting {{ my_input_select }} to Just Arrived states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}" 
+#             "Setting {{ my_input_select }} to Just Arrived states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}"
 #       - service: input_select.select_option
 #         data_template:
 #           entity_id: >
@@ -445,19 +436,19 @@ script:
 #                 Just Arrived
 #               {% endif %}
 #   # Mark as home 5 minutes after just arrived
-#   # Or if we go from just left to just arrived to not trigger home stuff when you were just home. 
+#   # Or if we go from just left to just arrived to not trigger home stuff when you were just home.
 #   - alias: BigSur Mark person as home
 #     id: bigsur_mark_person_as_home
 #     trigger:
 #       - platform: state
-#         entity_id: 
+#         entity_id:
 #           - input_select.tahi_bigsur_status
 #           - input_select.noe_bigsur_status
 #         to: 'Just Arrived'
 #         for:
 #           minutes: 5 # just arrived for 5 minutes, then mark as home
 #       - platform: state
-#         entity_id: 
+#         entity_id:
 #           - input_select.tahi_bigsur_status
 #           - input_select.noe_bigsur_status
 #         from: 'Just Left'
@@ -475,35 +466,34 @@ script:
 #         data_template:
 #           entity_id: >
 #             {{ my_input_select }}
-#           option: Home  
+#           option: Home
 #       - service: persistent_notification.create
 #         data_template:
-#           title: > 
+#           title: >
 #             "BigSur Mark person as home Triggered by {{ my_trigger_entity }}"
 #           message: |
 #             "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
-#             "Setting {{ my_input_select }} to Just Arrived states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}" 
-
+#             "Setting {{ my_input_select }} to Just Arrived states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}"
 
 # # Important one, we see when person stops being home...
 #   - alias: BigSur Mark Mark person as just left
 #     id: bigsur_mark_person_as_just_left
 #     trigger:
 #       - platform: state
-#         entity_id: 
+#         entity_id:
 #           - device_tracker.tracker_wifi_tahi
 #           - device_tracker.tracker_wifi_noe
-#           - device_tracker.tahi_phone
+#           - device_tracker.tahi_phone_gps
 #           - device_tracker.noe_phone
 #         from: 'BigSur'
-#         to: 
+#         to:
 #           - <not connected> # this is the case when we are not connected to wifi
 #           - not connected
 #           - unknown
 #           - not_home
 #           - home # yes, if we go from GibSur to home, we mark as just left
 #     # Optional check if any device_ytacvers are still on BigSur...
-#     #condition: 
+#     #condition:
 #     #  - condition: template
 #     #    value_template: >
 #     #      "{{ trigger.to_state.state not in ['unknown', 'not_home'] }}"
@@ -523,19 +513,18 @@ script:
 #           option: Just Left
 #       - service: persistent_notification.create
 #         data_template:
-#           title: > 
+#           title: >
 #             "BigSur Mark person as just left Triggered by {{ my_trigger_entity }}"
 #           message: |
 #             "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
 #             "Setting {{ my_input_select }} to Just Left states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}"
-  
-  
-#   # we mark as away 5 minutes after just left 
+
+#   # we mark as away 5 minutes after just left
 #   - alias: BigSur Mark person as away
 #     id: bigsur_mark_person_as_away
 #     trigger:
 #       - platform: state
-#         entity_id: 
+#         entity_id:
 #           - input_select.tahi_bigsur_status
 #           - input_select.noe_bigsur_status
 #         to: 'Just Left'
@@ -557,7 +546,7 @@ script:
 #           option: Away
 #       - service: persistent_notification.create
 #         data_template:
-#           title: > 
+#           title: >
 #             "BigSur Mark person as away Triggered by {{ my_trigger_entity }}"
 #           message: |
 #             "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
@@ -566,7 +555,7 @@ script:
 #     id: bigsur_mark_person_as_extended_away
 #     trigger:
 #       - platform: state
-#         entity_id: 
+#         entity_id:
 #           - input_select.tahi_bigsur_status
 #           - input_select.noe_bigsur_status
 #         to: 'Away'
@@ -588,52 +577,50 @@ script:
 #           option: Extended Away
 #       - service: persistent_notification.create
 #         data_template:
-#           title: > 
+#           title: >
 #             "BigSur Mark person as extended away Triggered by {{ my_trigger_entity }}"
 #           message: |
 #             "Triggered state {{ states(my_trigger_entity) }} -- from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}"
 #             "Setting {{ my_input_select }} to Extended Away states(my_input_select)  {{ states(my_input_select) }}  states.my_input_select.state {{ states['my_input_select'].state }}"
 
-  #- id: update_bigsur_status
-  #  alias: "Update BigSur Status"
-  #  mode: queued
-  #  trigger:
-  #    - platform: state
-  #      entity_id: device_tracker.tracker_wifi_tahi
-  #    - platform: state
-  #      entity_id: device_tracker.tracker_wifi_noe
-  #  condition: []
-  #  action:
-  #    - service: input_select.select_option
-  #      target:
-  #        entity_id: input_select.tahi_bigsur_status
-  #      data_template:
-  #        option: >
-  #          {% if is_state('device_tracker.tracker_wifi_tahi', 'BigSur') %}
-  #            Home
-  #          {% elif is_state('device_tracker.tracker_wifi_tahi', 'not_home') %}
-  #            Away
-  #          {% else %}
-  #            Extended Away
-  #          {% endif %}
-  #    - service: input_select.select_option
-  #      target:
-  #        entity_id: input_select.noe_bigsur_status
-  #      data_template:
-  #        option: >
-  #          {% if is_state('device_tracker.tracker_wifi_noe', 'BigSur') %}
-  #            Home
-  #          {% elif is_state('device_tracker.tracker_wifi_noe', 'not_home') %}
-  #            Away
-  #          {% else %}
-  #            Extended Away
-  #          {% endif %}
+#- id: update_bigsur_status
+#  alias: "Update BigSur Status"
+#  mode: queued
+#  trigger:
+#    - platform: state
+#      entity_id: device_tracker.tracker_wifi_tahi
+#    - platform: state
+#      entity_id: device_tracker.tracker_wifi_noe
+#  condition: []
+#  action:
+#    - service: input_select.select_option
+#      target:
+#        entity_id: input_select.tahi_bigsur_status
+#      data_template:
+#        option: >
+#          {% if is_state('device_tracker.tracker_wifi_tahi', 'BigSur') %}
+#            Home
+#          {% elif is_state('device_tracker.tracker_wifi_tahi', 'not_home') %}
+#            Away
+#          {% else %}
+#            Extended Away
+#          {% endif %}
+#    - service: input_select.select_option
+#      target:
+#        entity_id: input_select.noe_bigsur_status
+#      data_template:
+#        option: >
+#          {% if is_state('device_tracker.tracker_wifi_noe', 'BigSur') %}
+#            Home
+#          {% elif is_state('device_tracker.tracker_wifi_noe', 'not_home') %}
+#            Away
+#          {% else %}
+#            Extended Away
+#          {% endif %}
 
 # https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
-# Not so binary blueprint...  
+# Not so binary blueprint...
 
-  
 # lastras GPS coords: [40.3020089,-4.600871]
 # casaMolino GPS : [40.42415750701731, -3.70277613401413]
-
 

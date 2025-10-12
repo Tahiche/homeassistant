@@ -140,6 +140,8 @@ init_ssh() {
     
     ssh-add ~/.ssh/ha_id_rsa
     
+    eval $(ssh-agent -s) && ssh-add ~/.ssh/ha_id_rsa
+    
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ SSH key added to agent${NC}"
         return 0

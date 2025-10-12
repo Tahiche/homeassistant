@@ -1,4 +1,4 @@
-  # Reload entities/refresh on startup 
+# Reload entities/refresh on startup
 - id: reload_entities_on_restart
   alias: "HA reload entitites on restart and config reload"
   mode: queued
@@ -6,33 +6,33 @@
     - platform: homeassistant
       event: start
   conditions: []
-  action: 
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 10
-  - action: homeassistant.reload_all
-    
-  - service: homeassistant.update_entity
-    data:
-      entity_id:
-        - sensor.tahi_phone_wi_fi_connection
-        - sensor.noe_phone_wi_fi_connection
-        #- sensor.tahi_phone_wifi_connected_home # fails n restart
-        - sensor.tahi_phone_wifi_connected_bigsur
-        #- sensor.noe_phone_wifi_connected_home
-        - sensor.noe_phone_wifi_connected_bigsur
-        #- person.tahi
-        #- person.noe
-        # cannot updte device_tracker entities
-        #- device_tracker.noe_phone
-        #- device_tracker.tahi_phone
-        #- device_tracker.tracker_wifi_noe
-        #- device_tracker.tracker_wifi_tahi
-  - service: persistent_notification.create
-    data_template:
-      title: >
-          restart/reload 
-      message: > 
-          Restart or reload {{ now() }} 
-      notification_id: "automation_reooad"
+  action:
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 10
+    - action: homeassistant.reload_all
+
+    - service: homeassistant.update_entity
+      data:
+        entity_id:
+          - sensor.tahi_phone_wi_fi_connection
+          - sensor.noe_phone_wi_fi_connection
+          #- sensor.tahi_phone_wifi_connected_home # fails n restart
+          - sensor.tahi_phone_wifi_connected_bigsur
+          #- sensor.noe_phone_wifi_connected_home
+          - sensor.noe_phone_wifi_connected_bigsur
+          #- person.tahi
+          #- person.noe
+          # cannot updte device_tracker entities
+          #- device_tracker.noe_phone
+          #- device_tracker.tahi_phone_gps
+          #- device_tracker.tracker_wifi_noe
+          #- device_tracker.tracker_wifi_tahi
+    - service: persistent_notification.create
+      data_template:
+        title: >
+          restart/reload
+        message: >
+          Restart or reload {{ now() }}
+        notification_id: "automation_reooad"

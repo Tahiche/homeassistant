@@ -21,6 +21,7 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfElectricCurrent,
     EntityCategory,
+    PERCENTAGE,
 )
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.components.cover import (
@@ -55,6 +56,18 @@ from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelState,
 )
 
+from homeassistant.components.weather import (
+    WeatherEntity,
+    ATTR_CONDITION_CLEAR_NIGHT,
+    ATTR_CONDITION_CLOUDY,
+    ATTR_CONDITION_FOG,
+    ATTR_CONDITION_LIGHTNING,
+    ATTR_CONDITION_POURING,
+    ATTR_CONDITION_RAINY,
+    ATTR_CONDITION_SNOWY,
+    ATTR_CONDITION_SUNNY,
+)
+
 from .tydom.tydom_devices import (
     Tydom,
     TydomDevice,
@@ -68,6 +81,8 @@ from .tydom.tydom_devices import (
     TydomGarage,
     TydomLight,
     TydomAlarm,
+    TydomWeather,
+    TydomWater,
 )
 
 from .const import DOMAIN, LOGGER
@@ -195,7 +210,12 @@ class GenericSensor(SensorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return getattr(self._device, self._attribute)
+        value = getattr(self._device, self._attribute)
+        if self._attr_device_class == SensorDeviceClass.BATTERY:
+            min = self._device._metadata[self._attribute]["min"]
+            max = self._device._metadata[self._attribute]["max"]
+            value = ranged_value_to_percentage((min, max), value)
+        return value
 
     @property
     def device_info(self):
@@ -622,10 +642,13 @@ class HaClimate(ClimateEntity, HAEntity):
         "TempSensorShortCut": BinarySensorDeviceClass.PROBLEM,
         "ProductionDefect": BinarySensorDeviceClass.PROBLEM,
         "BatteryCmdDefect": BinarySensorDeviceClass.PROBLEM,
+        "battLevel": SensorDeviceClass.BATTERY,
     }
 
     units = {
         "temperature": UnitOfTemperature.CELSIUS,
+        "ambientTemperature": UnitOfTemperature.CELSIUS,
+        "hygroIn": PERCENTAGE,
     }
 
     def __init__(self, device: TydomBoiler, hass) -> None:
@@ -1164,3 +1187,107 @@ class HaAlarm(AlarmControlPanelEntity, HAEntity):
     async def async_get_events(self, event_type=None) -> list:
         """Get alarm events."""
         return await self._device.get_events(event_type or "UNACKED_EVENTS")
+
+
+class HaWeather(WeatherEntity, HAEntity):
+    """Representation of a weather entity."""
+
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
+
+    tydom_ha_condition = {
+        "UNAVAILABLE": None,
+        "DAY_CLEAR_SKY": ATTR_CONDITION_SUNNY,
+        "DAY_FEW_CLOUDS": ATTR_CONDITION_CLOUDY,
+        "DAY_SCATTERED_CLOUDS": ATTR_CONDITION_CLOUDY,
+        "DAY_BROKEN_CLOUDS": ATTR_CONDITION_CLOUDY,
+        "DAY_SHOWER_RAIN": ATTR_CONDITION_POURING,
+        "DAY_RAIN": ATTR_CONDITION_RAINY,
+        "DAY_THUNDERSTORM": ATTR_CONDITION_LIGHTNING,
+        "DAY_SNOW": ATTR_CONDITION_SNOWY,
+        "DAY_MIST": ATTR_CONDITION_FOG,
+        "NIGHT_CLEAR_SKY": ATTR_CONDITION_CLEAR_NIGHT,
+        "NIGHT_FEW_CLOUDS": ATTR_CONDITION_CLOUDY,
+        "NIGHT_SCATTERED_CLOUDS": ATTR_CONDITION_CLOUDY,
+        "NIGHT_BROKEN_CLOUDS": ATTR_CONDITION_CLOUDY,
+        "NIGHT_SHOWER_RAIN": ATTR_CONDITION_POURING,
+        "NIGHT_RAIN": ATTR_CONDITION_RAINY,
+        "NIGHT_THUNDERSTORM": ATTR_CONDITION_LIGHTNING,
+        "NIGHT_SNOW": ATTR_CONDITION_SNOWY,
+        "NIGHT_MIST": ATTR_CONDITION_FOG,
+    }
+
+    units = {
+        "outTemperature": UnitOfTemperature.CELSIUS,
+        "maxDailyOutTemp": UnitOfTemperature.CELSIUS,
+    }
+
+    def __init__(self, device: TydomWeather, hass) -> None:
+        """Initialize the sensor."""
+        self.hass = hass
+        self._device = device
+        self._device._ha_device = self
+        self._attr_unique_id = f"{self._device.device_id}_weather"
+        self._attr_name = self._device.device_name
+        self._registered_sensors = []
+        if (
+            "dailyPower" in self._device._metadata
+            and "unit" in self._device._metadata["dailyPower"]
+        ):
+            self.units["dailyPower"] = self._device._metadata["dailyPower"]["unit"]
+        if (
+            "currentPower" in self._device._metadata
+            and "unit" in self._device._metadata["currentPower"]
+        ):
+            self.units["currentPower"] = self._device._metadata["currentPower"]["unit"]
+
+    @property
+    def native_temperature(self) -> float | None:
+        """Return current temperature in C."""
+        return self._device.outTemperature
+
+    @property
+    def condition(self) -> str:
+        """Return current weather condition."""
+        return self.tydom_ha_condition[self._device.weather]
+
+    @property
+    def device_info(self):
+        """Return information to link this entity with the correct device."""
+        return {
+            "identifiers": {(DOMAIN, self._device.device_id)},
+            "name": self._device.device_name,
+        }
+
+
+class HaMoisture(BinarySensorEntity, HAEntity):
+    """Representation of an leak detector sensor."""
+
+    should_poll = False
+    supported_features = None
+
+    sensor_classes = {"batt_defect": BinarySensorDeviceClass.PROBLEM}
+
+    def __init__(self, device: TydomWater, hass) -> None:
+        """Initialize TydomSmoke."""
+        self.hass = hass
+        self._device = device
+        self._device._ha_device = self
+        self._attr_unique_id = f"{self._device.device_id}_moisture"
+        self._attr_name = self._device.device_name
+        self._state = False
+        self._registered_sensors = []
+        self._attr_device_class = BinarySensorDeviceClass.MOISTURE
+
+    @property
+    def is_on(self):
+        """Return the state of the sensor."""
+        return self._device.techWaterDefect
+
+    @property
+    def device_info(self):
+        """Return information to link this entity with the correct device."""
+        return {
+            "identifiers": {(DOMAIN, self._device.device_id)},
+            "name": self._device.device_name,
+            "manufacturer": "Delta Dore",
+        }

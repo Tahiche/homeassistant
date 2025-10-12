@@ -29,7 +29,23 @@ switch:
           data:
             message: "CasaFlores Presence Switch turn_off called (read-only switch)"
             level: info
-
+  - platform: template
+    switches:
+      casafflores_extended_away_switch_ha:
+        unique_id: casafflores_extended_away_switch_ha
+        friendly_name: "HA CasaFlores Extended Away Switch"
+        value_template: >
+          {{ is_state('input_select.casafflores_status_select', 'Extended Away') }}
+        turn_on:
+          service: system_log.write
+          data:
+            message: "CasaFlores Extended Away Switch turn_on called (read-only switch)"
+            level: info
+        turn_off:
+          service: system_log.write
+          data:
+            message: "CasaFlores Extended Away Switch turn_off called (read-only switch)"
+            level: info  
 
 # who is at casa...
 # chaks persons for ome state
