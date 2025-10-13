@@ -31,7 +31,9 @@ smart_home:
         - remote.ha_*
         - group.ha_*
         - input_boolean.ha_*
+        - input_boolean.*_ha
         - switch.ha_*
+        - switch.*_ha
         - '*.alexa_ha_*'
         - '*.*_alexa_ha_' 
         - '*.*_alexa_ha_*' # any entity containing _alexa_ha_ in name
@@ -45,7 +47,7 @@ smart_home:
         - input_boolean.alert_when_high_processor_load
         - switch.ikeaplug_1_studio
         - switch.sonoff_plug_2_ha
-        - input_select.casaflores_presence_not_binary
+        - input_boolean.echo_studioflowers_presence_detected_ha
         
       exclude_entities:
         - media_player.yamaha_receiver_family_room

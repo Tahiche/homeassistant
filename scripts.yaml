@@ -191,7 +191,7 @@ update_location_entities:
           - device_tracker.tahi_phone_gps
           - device_tracker.noe_phone
           - device_tracker.tahi_owntracks
-          - sensor.noe_pixel_8a_wi_fi_connection
+          - sensor.noe_phone_wi_fi_connection
           - sensor.tahi_phone_wi_fi_connection
           - device_tracker.tahi_pixel_bluetooth_bt_e8_d5_2b_1f_b7_34
           - device_tracker.noe_pixel_bluetooth_bt_fc_41_16_e3_48_72

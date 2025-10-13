@@ -35,7 +35,7 @@ tahi_wifi_sensor:
     icon: mdi:wifi
     restore: false
 noe_wifi_sensor:
-    initial_value: 'sensor.noe_pixel_8a_wi_fi_connection'
+    initial_value: 'sensor.noe_phone_wi_fi_connection'
     icon: mdi:wifi
     restore: false
 # for bluetooth and ping device trackers.

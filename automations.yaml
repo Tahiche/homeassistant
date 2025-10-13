@@ -1,357 +1,361 @@
-- id: "1739219616270"
+- id: '1739219616270'
   alias: HarmonyHub Proyector
-  description: ""
+  description: ''
   triggers:
-    - trigger: conversation
-      command:
-        - Proyector
-        - Peli
+  - trigger: conversation
+    command:
+    - Proyector
+    - Peli
   conditions: []
   actions:
-    - device_id: beb956ab8e78409b1d2ab30c59f7091d
-      domain: select
-      entity_id: 557ffc198e7330f496d9e093949cb284
-      type: select_option
-      option: Movie
+  - device_id: beb956ab8e78409b1d2ab30c59f7091d
+    domain: select
+    entity_id: 557ffc198e7330f496d9e093949cb284
+    type: select_option
+    option: Movie
   mode: single
-- id: "1739276320251"
+- id: '1739276320251'
   alias: Home assistant restart announce
-  description: ""
+  description: ''
   triggers:
-    - trigger: homeassistant
-      event: start
+  - trigger: homeassistant
+    event: start
   conditions:
-    - condition: state
-      entity_id: input_boolean.mute_alexa_notifications
-      state: "off"
+  - condition: state
+    entity_id: input_boolean.mute_alexa_notifications
+    state: 'off'
   actions:
-    - action: notify.alexa_media_echo_dot_estudioflowers
-      data:
-        message: Home assistant restart
-    - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
-      domain: mobile_app
-      type: notify
-      message: Home assistant restarted
-      title: HA restart
+  - action: notify.alexa_media_echo_dot_estudioflowers
+    data:
+      message: Home assistant restart
+  - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
+    domain: mobile_app
+    type: notify
+    message: Home assistant restarted
+    title: HA restart
   mode: single
-- id: "1739391157357"
+- id: '1739391157357'
   alias: Zone Notification
-  description: ""
+  description: ''
   use_blueprint:
     path: homeassistant/notify_leaving_zone.yaml
     input:
       person_entity: person.tahi
       zone_entity: zone.home
       notify_device: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
-- id: "1739393340107"
-  alias: "Notify Tahi leave home "
-  description: ""
+- id: '1739393340107'
+  alias: 'Notify Tahi leave home '
+  description: ''
   triggers:
-    - trigger: zone
-      entity_id: person.tahi
-      zone: zone.home
-      event: leave
+  - trigger: zone
+    entity_id: person.tahi
+    zone: zone.home
+    event: leave
   conditions: []
   actions:
-    - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
-      domain: mobile_app
-      type: notify
-      message: Tahi left home
-      title: HA zone
+  - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
+    domain: mobile_app
+    type: notify
+    message: Tahi left home
+    title: HA zone
   mode: single
-- id: "1739716910820"
+- id: '1739716910820'
   alias: Tahi is home
-  description: ""
+  description: ''
   triggers:
-    - trigger: zone
-      entity_id: person.tahi
-      zone: zone.home
-      event: enter
+  - trigger: zone
+    entity_id: person.tahi
+    zone: zone.home
+    event: enter
   conditions: []
   actions:
-    - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
-      domain: mobile_app
-      type: notify
-      message: "Tahi is Home "
-      title: HA zone
+  - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
+    domain: mobile_app
+    type: notify
+    message: 'Tahi is Home '
+    title: HA zone
   mode: single
-- id: "1739732897836"
+- id: '1739732897836'
   alias: Up counter
-  description: ""
+  description: ''
   triggers:
-    - domain: mqtt
-      device_id: b7dedc55eb09f39b5581856030181bef
-      type: action
-      subtype: brightness_move_up
-      trigger: device
+  - domain: mqtt
+    device_id: b7dedc55eb09f39b5581856030181bef
+    type: action
+    subtype: brightness_move_up
+    trigger: device
   conditions: []
   actions:
-    - action: notify.alexa_media_echo_dot_estudioflowers
-      metadata: {}
-      data:
-        message: this is it
-    - alias: Notify that
-      action: notify.notify
-      data:
-        message:
-          "Paulus just changed from This was triggered by {{ trigger.id }} trigger
-          {% for i in trigger %}\n  {{ i }} : {{ trigger[i] }}\n{% endfor %} Payload:
-          {{ trigger.payload }}  {% set bright=state_attr('light.hue_lights_group',
-          'brightness') %} \ncurrent brightness: {{ bright }}\n"
+  - action: notify.alexa_media_echo_dot_estudioflowers
+    metadata: {}
+    data:
+      message: this is it
+  - alias: Notify that
+    action: notify.notify
+    data:
+      message: "Paulus just changed from This was triggered by {{ trigger.id }} trigger
+        {% for i in trigger %}\n  {{ i }} : {{ trigger[i] }}\n{% endfor %} Payload:
+        {{ trigger.payload }}  {% set bright=state_attr('light.hue_lights_group',
+        'brightness') %} \ncurrent brightness: {{ bright }}\n"
   mode: single
-- id: "1740424364137"
+- id: '1740424364137'
   alias: CPU over % warning
-  description: ""
+  description: ''
   triggers:
-    - type: value
-      device_id: daa230848a8f1df1fd9ca999c24d3842
-      entity_id: babf6bdfe989f12c5bbb9043841a8385
-      domain: sensor
-      trigger: device
-      above: 70
-      for:
-        hours: 0
-        minutes: 5
-        seconds: 0
+  - type: value
+    device_id: daa230848a8f1df1fd9ca999c24d3842
+    entity_id: babf6bdfe989f12c5bbb9043841a8385
+    domain: sensor
+    trigger: device
+    above: 70
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
   conditions:
-    - condition: state
-      entity_id: input_boolean.alert_when_high_processor_load
-      state: "on"
+  - condition: state
+    entity_id: input_boolean.alert_when_high_processor_load
+    state: 'on'
   actions:
-    - action: notify.mobile_app_pixel_8a
-      metadata: {}
+  - action: notify.mobile_app_pixel_8a
+    metadata: {}
+    data:
+      title: HA CPU Monitor
+      message: HA Procesador at {{ states('sensor.system_monitor_uso_del_procesador')
+        }}% for more than 5 minutes
       data:
-        title: HA CPU Monitor
-        message:
-          HA Procesador at {{ states('sensor.system_monitor_uso_del_procesador')
-          }}% for more than 5 minutes
-        data:
-          notification_icon: mdi:cpu-64-bit
-          tag: cpu
+        notification_icon: mdi:cpu-64-bit
+        tag: cpu
   mode: single
-- id: "1740690884606"
+- id: '1740690884606'
   alias: Calefacción wifi switch control
-  description: ""
+  description: ''
   triggers:
-    - trigger: state
-      entity_id:
-        - switch.alexa_ha_tydom_heat_plug_switch
-      for:
-        hours: 0
-        minutes: 0
-        seconds: 1
+  - trigger: state
+    entity_id:
+    - switch.alexa_ha_tydom_heat_plug_switch
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
   conditions: []
   actions:
-    - choose:
-        - conditions:
-            - condition: state
-              entity_id: switch.alexa_ha_tydom_heat_plug_switch
-              state: "on"
-          sequence:
-            - action: notify.alexa_media_last_called
-              metadata: {}
-              data:
-                message: Calefaccion bigsur plug is on
-              enabled: false
-            - action: script.calefaccion_switch_alexa_routine
-              data: {}
-        - conditions:
-            - condition: state
-              entity_id: switch.alexa_ha_tydom_heat_plug_switch
-              state: "off"
-          sequence:
-            - action: notify.alexa_media_last_called
-              metadata: {}
-              data:
-                message: Cal off
-              enabled: false
-            - action: script.calefaccion_lastras_off_switch_alexa_routine_2
-              data: {}
+  - choose:
+    - conditions:
+      - condition: state
+        entity_id: switch.alexa_ha_tydom_heat_plug_switch
+        state: 'on'
+      sequence:
+      - action: notify.alexa_media_last_called
+        metadata: {}
+        data:
+          message: Calefaccion bigsur plug is on
+        enabled: false
+      - action: script.calefaccion_switch_alexa_routine
+        data: {}
+    - conditions:
+      - condition: state
+        entity_id: switch.alexa_ha_tydom_heat_plug_switch
+        state: 'off'
+      sequence:
+      - action: notify.alexa_media_last_called
+        metadata: {}
+        data:
+          message: Cal off
+        enabled: false
+      - action: script.calefaccion_lastras_off_switch_alexa_routine_2
+        data: {}
   mode: single
-- id: "1741191876226"
+- id: '1741191876226'
   alias: Link On/Off State of heat input and switch
-  description: ""
+  description: ''
   use_blueprint:
     path: aderusha/link_multiple_devices.yaml
     input:
       linked_entities:
-        - input_boolean.alexa_ha_tydom_heat_plug_input
-        - switch.alexa_ha_tydom_heat_plug_switch
-- id: "1741634983555"
-  alias: "BigSur Tahi: Status Update"
-  description: ""
+      - input_boolean.alexa_ha_tydom_heat_plug_input
+      - switch.alexa_ha_tydom_heat_plug_switch
+- id: '1741634983555'
+  alias: 'BigSur Tahi: Status Update'
+  description: ''
   use_blueprint:
     path: cliffordwhansen/presence_non_binary.yaml
     input:
       person_input_select: input_select.tahi_bigsur_status_dropdown
       person_device_tracker: device_tracker.tahi_phone_gps
-- id: "1744154357231"
+- id: '1744154357231'
   alias: Motion detector ON bigsur front
-  description: ""
+  description: ''
   triggers:
-    - trigger: state
-      entity_id:
-        - input_boolean.ha_listen_bigsur_entrada_motion
-      from: "off"
-      to: "on"
+  - trigger: state
+    entity_id:
+    - input_boolean.ha_listen_bigsur_entrada_motion
+    from: 'off'
+    to: 'on'
   conditions:
-    - condition: and
-      conditions:
-        - condition: sun
-          after: sunset
-          after_offset: 00:30
-    - condition: or
-      conditions:
-        - condition: state
-          entity_id: switch.bigsur_presence_switch_ha
-          state: "on"
-        - condition: zone
-          entity_id: person.noe
-          zone: zone.bigsur
-        - condition: zone
-          entity_id: person.tahi
-          zone: zone.bigsur
-        - condition: state
-          entity_id: input_select.bigsur_status_select
-          state: "Just Arrived "
-        - condition: state
-          entity_id: input_select.bigsur_status_select
-          state: Home
+  - condition: and
+    conditions:
+    - condition: sun
+      after: sunset
+      after_offset: 00:30
+  - condition: or
+    conditions:
     - condition: state
-      entity_id: sensor.bigsur_occupancy
-      state: Home
+      entity_id: switch.bigsur_presence_switch_ha
+      state: 'on'
+    - condition: zone
+      entity_id: person.noe
+      zone: zone.bigsur
+    - condition: zone
+      entity_id: person.tahi
+      zone: zone.bigsur
   actions:
-    - action: notify.mobile_app_tahi_phone
-      metadata: {}
-      data:
-        message: "Motion detected front door  "
-        title: HA - BigSur motion sensor
-    - action: notify.alexa_media_everywhere
-      metadata: {}
-      data:
-        message: Motion detected Frontdoor BigSur
-        title: HA BigSur
-    - action: switch.turn_on
-      metadata: {}
+  - action: notify.mobile_app_tahi_phone
+    metadata: {}
+    data:
+      message: 'Motion detected front door  '
+      title: HA - BigSur motion sensor
+  - action: notify.alexa_media_everywhere
+    metadata: {}
+    data:
+      message: Motion detected Frontdoor BigSur
+      title: HA BigSur
+  - action: light.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.luz_entrada
+  - action: switch.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.luz_entrada
+  - delay:
+      hours: 0
+      minutes: 2
+      seconds: 0
+      milliseconds: 0
+  - action: light.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: light.luz_entrada
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ha_listen_bigsur_entrada_motion
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: switch.luz_entrada
+  mode: single
+- id: '1749893828289'
+  alias: Motion detector OFF bigsur front
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.ha_listen_bigsur_entrada_motion
+    from: 'on'
+    to:
+  conditions: []
+  actions:
+  - action: notify.mobile_app_tahi_phone
+    metadata: {}
+    data:
+      message: Motion stopped front door  BigSur
+      title: HA - BigSur motion sensor
+  - action: notify.alexa_media_everywhere
+    metadata: {}
+    data:
+      message: Motion stopped  Frontdoor BigSur
+      title: HA BigSur Motion Sensor
+  mode: single
+- id: '1750105839543'
+  alias: "Rain BigSur \U0001F327️"
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - weather.bigsur
+    to: rainy
+    from:
+  - trigger: state
+    entity_id:
+    - weather.bigsur
+    to: pouring
+  conditions: []
+  actions:
+  - action: persistent_notification.create
+    metadata: {}
+    data:
+      message: 'Raining in BigSur '
+      title: "HA weather \U0001F327️"
+  - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
+    domain: mobile_app
+    type: notify
+    message: "Raining in BigSur \U0001F327️"
+    title: "Ha Weather \U0001F327️"
+  mode: single
+- id: '1758554071867'
+  alias: HA Discover Weekly
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.ha_discover_weekly_helper
+    from:
+    to: 'on'
+  conditions: []
+  actions:
+  - sequence:
+    - action: script.discover_weekly
       data: {}
-      target:
-        entity_id: switch.luz_entrada
     - delay:
         hours: 0
-        minutes: 2
-        seconds: 0
+        minutes: 0
+        seconds: 10
         milliseconds: 0
-    - action: switch.turn_off
+    - action: input_boolean.turn_off
       metadata: {}
       data: {}
       target:
-        entity_id: switch.luz_entrada
+        entity_id: input_boolean.ha_discover_weekly_helper
   mode: single
-- id: "1749893828289"
-  alias: Motion detector OFF bigsur front
-  description: ""
-  triggers:
-    - trigger: state
-      entity_id:
-        - input_boolean.ha_listen_bigsur_entrada_motion
-      from: "on"
-      to:
-  conditions: []
-  actions:
-    - action: notify.mobile_app_tahi_phone
-      metadata: {}
-      data:
-        message: Motion stopped front door  BigSur
-        title: HA - BigSur motion sensor
-    - action: notify.alexa_media_everywhere
-      metadata: {}
-      data:
-        message: Motion stopped  Frontdoor BigSur
-        title: HA BigSur Motion Sensor
-  mode: single
-- id: "1750105839543"
-  alias: "Rain BigSur \U0001F327️"
-  description: ""
-  triggers:
-    - trigger: state
-      entity_id:
-        - weather.bigsur
-      to: rainy
-      from:
-    - trigger: state
-      entity_id:
-        - weather.bigsur
-      to: pouring
-  conditions: []
-  actions:
-    - action: persistent_notification.create
-      metadata: {}
-      data:
-        message: "Raining in BigSur "
-        title: "HA weather \U0001F327️"
-    - device_id: fb3b17d6c8f13df6bf2d3ad3fe6fa97d
-      domain: mobile_app
-      type: notify
-      message: "Raining in BigSur \U0001F327️"
-      title: "Ha Weather \U0001F327️"
-  mode: single
-- id: "1758554071867"
-  alias: HA Discover Weekly
-  description: ""
-  triggers:
-    - trigger: state
-      entity_id:
-        - input_boolean.ha_discover_weekly_helper
-      from:
-      to: "on"
-  conditions: []
-  actions:
-    - sequence:
-        - action: script.discover_weekly
-          data: {}
-        - delay:
-            hours: 0
-            minutes: 0
-            seconds: 10
-            milliseconds: 0
-        - action: input_boolean.turn_off
-          metadata: {}
-          data: {}
-          target:
-            entity_id: input_boolean.ha_discover_weekly_helper
-  mode: single
-- id: "1758909389264"
+- id: '1758909389264'
   alias: Create FAN startup
-  description: ""
+  description: ''
   triggers:
-    - type: changed_states
-      device_id: 8bb542e1854bd4febea8551a6b4c8097
-      entity_id: 9c4d8756cea6fd9fe4661e5885b18e95
-      domain: fan
-      trigger: device
-    - trigger: state
-      entity_id:
-        - switch.create_estudio_flowers_sonido
-      from:
-      to: "on"
+  - type: changed_states
+    device_id: 8bb542e1854bd4febea8551a6b4c8097
+    entity_id: 9c4d8756cea6fd9fe4661e5885b18e95
+    domain: fan
+    trigger: device
+  - trigger: state
+    entity_id:
+    - switch.create_estudio_flowers_sonido
+    from:
+    to: 'on'
   conditions: []
   actions:
-    - type: turn_off
-      device_id: 8bb542e1854bd4febea8551a6b4c8097
-      entity_id: 0d05c4ccf9b7fe003508eb45f5ae1adc
-      domain: switch
+  - type: turn_off
+    device_id: 8bb542e1854bd4febea8551a6b4c8097
+    entity_id: 0d05c4ccf9b7fe003508eb45f5ae1adc
+    domain: switch
   mode: single
-- id: "1759504975325"
-  alias: "Tahi presence not so binary "
-  description: ""
+- id: '1759504975325'
+  alias: 'Tahi presence not so binary '
+  description: ''
   use_blueprint:
     path: cliffordwhansen/presence_non_binary.yaml
     input:
       person_input_select: input_select.tahi_casa_status
       person_device_tracker: device_tracker.tahi_casa_composite_bayesian
-- id: "1759571828300"
-  alias: "Modded Person: Status Update"
-  description: ""
+- id: '1759571828300'
+  alias: 'Modded Person: Status Update'
+  description: ''
   use_blueprint:
     path: Tahi-custom/Tahi-presence-not-binary-modded.yaml
     input:

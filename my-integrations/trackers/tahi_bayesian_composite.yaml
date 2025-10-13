@@ -11,7 +11,7 @@ binary_sensor:
     observations:
       # 1. GPS/Mobile App Tracker (The primary away indicator)
       - platform: "template"
-        value_template: "{{ is_state('device_tracker.tahi_phone_gps', 'home') or is_state('device_tracker.tahi_phone', 'CasaFlores') }}"
+        value_template: "{{ is_state('device_tracker.tahi_phone_gps', 'home') or is_state('device_tracker.tahi_phone_gps', 'CasaFlores') }}"
         prob_given_true: 0.85
         prob_given_false: 0.15
 
@@ -69,10 +69,10 @@ sensor:
           probability: "{{ state_attr('binary_sensor.tahi_casa_bayesian_sensor', 'probability') }}"
 
           # States of observed entities
-          gps_tracker_state: "{{ states('device_tracker.tahi_phone') }}"
-          gps_tracker_last_changed: "{{ states.device_tracker.tahi_phone.last_changed }}"
+          gps_tracker_state: "{{ states('device_tracker.tahi_phone_gps') }}"
+          gps_tracker_last_changed: "{{ states.device_tracker.tahi_phone_gps.last_changed }}"
           gps_tracker_last_updated_minutes_ago: >
-            {% set last_update = as_timestamp(now()) - as_timestamp(states.device_tracker.tahi_phone.last_updated) %}
+            {% set last_update = as_timestamp(now()) - as_timestamp(states.device_tracker.tahi_phone_gps.last_updated) %}
             {{ (last_update / 60) | round(1) }}
 
           wifi_connection_state: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"

@@ -52,7 +52,7 @@ binary_sensor:
       # AND has been updated in the last 15 minutes (900 seconds)
       - platform: template
         value_template: >
-          {% set wifi_sensor = 'sensor.noe_pixel_8a_wi_fi_connection' %}
+          {% set wifi_sensor = 'sensor.noe_phone_wi_fi_connection' %}
           {{ states(wifi_sensor) in states('var.wifi_bigsur_array') }}
         #   {% set last_update = as_timestamp(now()) - as_timestamp(states[wifi_sensor].last_updated) %}
         #   {{ states(wifi_sensor) in states('var.wifi_bigsur_array') and last_update < 900 }}
@@ -141,7 +141,7 @@ sensor:
           tahi_device_tracker: "{{ states('device_tracker.tahi_phone_gps') }}"
           noe_device_tracker: "{{ states('device_tracker.noe_phone') }}"
           tahi_wifi: "{{ states('sensor.tahi_phone_wi_fi_connection') }}"
-          noe_wifi: "{{ states('sensor.noe_pixel_8a_wi_fi_connection') }}"
+          noe_wifi: "{{ states('sensor.noe_phone_wi_fi_connection') }}"
 
 # https://community.home-assistant.io/t/making-home-assistant-s-presence-detection-not-so-binary/329408
 # Not so binary blueprint...

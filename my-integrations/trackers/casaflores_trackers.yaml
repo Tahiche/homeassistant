@@ -129,7 +129,7 @@ template:
 #           {% endif %}
 #   - trigger:
 #       - platform: state
-#         entity_id: sensor.noe_pixel_8a_wi_fi_connection
+#         entity_id: sensor.noe_phone_wi_fi_connection
 #       - platform: homeassistant
 #         event: start
 #       - platform: event
@@ -139,8 +139,8 @@ template:
 #         unique_id: noe_phone_wifi_connected_casaflores # Unique ID is required for the UI, but is set by name
 #         # instead od strict query we use in so it works with CasaMolino EXT, for example
 #         state: >-
-#           {% if states('sensor.noe_pixel_8a_wi_fi_connection') == states('var.wifi_casaflores')
-#           or states('sensor.noe_pixel_8a_wi_fi_connection') in states('var.wifi_casaflores_array') %}
+#           {% if states('sensor.noe_phone_wi_fi_connection') == states('var.wifi_casaflores')
+#           or states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_casaflores_array') %}
 #           connected
 #           {% else %}
 #           disconnected
@@ -149,8 +149,8 @@ template:
 #          ha_rand: >-
 #            random-{{ range(1, 51) | random }} 
 #         icon: >-
-#           {% if states('sensor.noe_pixel_8a_wi_fi_connection') == states('var.wifi_casaflores')
-#           or states('sensor.noe_pixel_8a_wi_fi_connection') in states('var.wifi_casaflores_array') %}
+#           {% if states('sensor.noe_phone_wi_fi_connection') == states('var.wifi_casaflores')
+#           or states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_casaflores_array') %}
 #             mdi:home-account
 #           {% else %}
 #             mdi:home-off-outline

@@ -21,7 +21,7 @@ binary_sensor:
         # AND has been updated in the last 15 minutes (900 seconds) 
       - platform: template
         value_template: >
-          {% set wifi_sensor = 'sensor.noe_pixel_8a_wi_fi_connection' %}
+          {% set wifi_sensor = 'sensor.noe_phone_wi_fi_connection' %}
           {{ states(wifi_sensor) in states('var.wifi_casaflores_array') }}
         #   {% set last_update = as_timestamp(now()) - as_timestamp(state_attr(wifi_sensor, 'last_updated')) %}
         #   {{ states(wifi_sensor) in states('var.wifi_casaflores_array') and last_update < 900 }}
@@ -74,12 +74,12 @@ sensor:
             {% set last_update = as_timestamp(now()) - as_timestamp(states.device_tracker.noe_phone.last_updated) %}
             {{ (last_update / 60) | round(1) }}
 
-          wifi_connection_state: "{{ states('sensor.noe_pixel_8a_wi_fi_connection') }}"
-          wifi_connection_last_updated: "{{ state_attr('sensor.noe_pixel_8a_wi_fi_connection', 'last_updated') }}"
+          wifi_connection_state: "{{ states('sensor.noe_phone_wi_fi_connection') }}"
+          wifi_connection_last_updated: "{{ state_attr('sensor.noe_phone_wi_fi_connection', 'last_updated') }}"
           wifi_is_home_network: >
-            {{ states('sensor.noe_pixel_8a_wi_fi_connection') in states('var.wifi_casaflores_array') }}
+            {{ states('sensor.noe_phone_wi_fi_connection') in states('var.wifi_casaflores_array') }}
           wifi_last_update_minutes_ago: >
-            {% set last_update = as_timestamp(now()) - as_timestamp(states.sensor.noe_pixel_8a_wi_fi_connection.last_updated) %}
+            {% set last_update = as_timestamp(now()) - as_timestamp(states.sensor.noe_phone_wi_fi_connection.last_updated) %}
             {{ (last_update / 60) | round(1) }}
 
           bluetooth_tracker_state: "{{ states('device_tracker.noe_pixel_bluetooth_bt_fc_41_16_e3_48_72') }}"
@@ -91,7 +91,7 @@ sensor:
           # Summary of all entity states for quick reference
           entity_states_summary: >-
             GPS: {{ states('device_tracker.noe_phone') }} |
-            WiFi: {{ states('sensor.noe_pixel_8a_wi_fi_connection') }} |
+            WiFi: {{ states('sensor.noe_phone_wi_fi_connection') }} |
             Bluetooth: {{ states('device_tracker.noe_pixel_bluetooth_bt_fc_41_16_e3_48_72') }} |
 
           observations: "{{ state_attr('binary_sensor.noe_casa_bayesian_sensor', 'observations') }}"

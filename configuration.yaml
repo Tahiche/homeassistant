@@ -14,6 +14,7 @@ homeassistant:
     devices_and_automations: !include my-integrations/trackers/devices_and_automations.yaml
     # bluetooth_trackers: !include my-integrations/trackers/bluetooth_tracking.yaml  # Commented out - now using config entry
     config_helpers_alexa: !include my-integrations/config_helpers/alexa.yaml
+    alexa_helpers: !include my-integrations/helpers/alexa_helpers.yaml
     #bigsur_heating: !include_dir_named my-integrations/bigsur_heating
     #config_helpers: !include_dir_named my-integrations/config_helpers
 

@@ -1,6 +1,6 @@
 {
     "1": {
-        "state": "OFF"
+        "state": "ON"
     },
     "0x804b50fffe9e49ca": {
         "battery": 95,
@@ -24,7 +24,7 @@
         "linkquality": 48
     },
     "0x84fd27fffe564db2": {
-        "state": "OFF",
+        "state": "ON",
         "power_on_behavior": "off",
         "update": {
             "state": "idle",
@@ -34,7 +34,7 @@
         "linkquality": 129
     },
     "0x00124b002f895605": {
-        "state": "OFF",
+        "state": "ON",
         "linkquality": 105
     }
 }

@@ -1,0 +1,8 @@
+# helper entities we want to expose to Alexato control. 
+
+input_boolean:
+  # This is the entity ID: input_boolean.echo_presence_detected
+  echo_studioflowers_presence_detected_ha:
+    name: HA Echo dot Studioflowers Presence
+    initial: off
+    icon: mdi:account-circle

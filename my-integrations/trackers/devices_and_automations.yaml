@@ -12,7 +12,7 @@ automation:
       - platform: state
         entity_id: sensor.tahi_phone_wi_fi_connection
       - platform: state
-        entity_id: sensor.noe_pixel_8a_wi_fi_connection
+        entity_id: sensor.noe_phone_wi_fi_connection
     condition: []
     action:
       - service: device_tracker.see
@@ -20,7 +20,7 @@ automation:
           dev_id: >
             {% if trigger.entity_id == 'sensor.tahi_phone_wi_fi_connection' %}
               tracker_wifi_tahi
-            {% elif trigger.entity_id == 'sensor.noe_pixel_8a_wi_fi_connection' %}
+            {% elif trigger.entity_id == 'sensor.noe_phone_wi_fi_connection' %}
               tracker_wifi_noe
             {% else %}
               tracker_wifi_unknown
