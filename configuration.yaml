@@ -15,6 +15,8 @@ homeassistant:
     # bluetooth_trackers: !include my-integrations/trackers/bluetooth_tracking.yaml  # Commented out - now using config entry
     config_helpers_alexa: !include my-integrations/config_helpers/alexa.yaml
     alexa_helpers: !include my-integrations/helpers/alexa_helpers.yaml
+    # Dynamic groups based on device labels. Exposed to Alexa as groups.
+    group_label_helpers: !include my-integrations/helpers/groups_from_labels.yaml
     #bigsur_heating: !include_dir_named my-integrations/bigsur_heating
     #config_helpers: !include_dir_named my-integrations/config_helpers
 
@@ -46,6 +48,7 @@ http:
   # List of trusted network ranges and IPs
   trusted_proxies:
     - 192.168.1.1                # Synology NAS IP
+    - 192.168.1.0/24             # Local network range
     - 172.30.33.4
     - 172.30.33.0/24
     - 127.0.0.1                  # Localhost

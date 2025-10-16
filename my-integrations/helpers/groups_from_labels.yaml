@@ -1,0 +1,166 @@
+# Dynamic Group Automation for Estudio Flowers
+# This automation creates and maintains a dynamic group based on entities with the "Estudio Flowers" label
+
+input_boolean:
+  estudio_flowers_lights_master_control_ha:
+    name: "Estudio Flowers Lights Master Control"
+    icon: "mdi:lightbulb-group"
+    initial: false
+
+automation:
+  - id: estudio_flowers_dynamic_group_automation
+    alias: "Dynamic Group: Estudio Flowers label All Entities"
+    description: "Automatically maintains a dynamic group of all entities labeled 'Estudio Flowers'"
+    
+    trigger:
+      # Trigger when Home Assistant starts
+      - platform: homeassistant
+        event: start
+      # Trigger when any entity registry changes (new devices added/removed)
+      - platform: event
+        event_type: entity_registry_updated
+      # Trigger periodically to catch any changes (every hour)
+      - platform: time_pattern
+        hours: "/1"
+    
+    condition: []
+    
+    action:
+      # Use the built-in label_entities() function - much simpler!
+      - service: group.set
+        data:
+          object_id: estudio_flowers_dynamic
+          name: "Estudio Flowers - All Entities w label"
+          icon: "mdi:flower"
+          entities: >
+            {{ label_entities('Estudio Flowers') }}
+      - service: group.set
+        data:
+          object_id: estudio_flowers_dynamic_lights_ha
+          name: "Estudio Flowers - Lights and Switches w label"
+          icon: "mdi:flower"
+          entities: >
+            {% set entities = label_entities('Estudio Flowers') %}
+            {{ entities | select('match', '^(light|switch)\.') | list }}
+
+      # Log the updated group members for debugging
+      - service: system_log.write
+        data:
+          level: info
+          message: >
+            Dynamic Group 'Estudio Flowers' updated with entities: 
+            {{ label_entities('Estudio Flowers') | join(', ') }}
+      - service: system_log.write
+        data:
+          level: info
+          message: >
+            Dynamic Group  "Estudio Flowers - Lights and Switches w label" updated with entities: 
+            {% set entities = label_entities('Estudio Flowers') %}
+            {{ entities | select('match', '^(light|switch)\.') | list | join(', ') }}
+
+  - id: estudio_flowers_lights_manual_control
+    alias: "Estudio Flowers - Lights Master Control"
+    description: "Manual control for Estudio Flowers lights and switches using existing group"
+    
+    trigger:
+      - platform: state
+        entity_id: input_boolean.estudio_flowers_lights_master_control_ha
+        to: 'on'
+        id: turn_on
+      - platform: state
+        entity_id: input_boolean.estudio_flowers_lights_master_control_ha
+        to: 'off' 
+        id: turn_off
+    
+    action:
+      # Use the SAME template logic as your existing master control automation
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: turn_on
+            sequence:
+              - service: homeassistant.turn_on
+                target:
+                  entity_id: >
+                    {% set group_entities = state_attr('group.estudio_flowers_dynamic', 'entity_id') or [] %}
+                    {% set ns = namespace(controllable=[]) %}
+                    {% for entity_id in group_entities %}
+                      {% if entity_id.startswith(('light.', 'switch.')) %}
+                        {% set ns.controllable = ns.controllable + [entity_id] %}
+                      {% endif %}
+                    {% endfor %}
+                    {{ ns.controllable }}
+                  # using jinja select filter - simpler but may error if group is empty
+                  # entity_id: >
+                  #   {% set group_entities = state_attr('group.estudio_flowers_dynamic', 'entity_id') or [] %}
+                  #   {{ group_entities | select('match', '^(light|switch)\.') | list }}
+          
+          - conditions:
+              - condition: trigger
+                id: turn_off
+            sequence:
+              - service: homeassistant.turn_off
+                target:
+                  entity_id: >
+                    {% set group_entities = state_attr('group.estudio_flowers_dynamic', 'entity_id') or [] %}
+                    {% set ns = namespace(controllable=[]) %}
+                    {% for entity_id in group_entities %}
+                      {% if entity_id.startswith(('light.', 'switch.')) %}
+                        {% set ns.controllable = ns.controllable + [entity_id] %}
+                      {% endif %}
+                    {% endfor %}
+                    {{ ns.controllable }}
+
+# Optional: Input boolean to enable/disable the dynamic grouping
+# add as a condition to the automations if desired
+# input_boolean:
+#   estudio_flowers_dynamic_grouping:
+#     name: "Enable Estudio Flowers Dynamic Grouping"
+#     icon: "mdi:auto-fix"
+#     initial: true
+
+# Optional: Template sensors for monitoring
+template:
+  - sensor:
+      - name: "Estudio Flowers Total Entity Count"
+        unique_id: estudio_flowers_total_entity_count
+        state: >
+          {{ state_attr('group.estudio_flowers_dynamic', 'entity_id') | list | length }}
+        attributes:
+          all_entities: >
+            {{ state_attr('group.estudio_flowers_dynamic', 'entity_id') | list }}
+        icon: "mdi:counter"
+      
+      - name: "Estudio Flowers Controllable Entity Count"
+        unique_id: estudio_flowers_controllable_entity_count
+        state: >
+          {%- set group_entities = state_attr('group.estudio_flowers_dynamic', 'entity_id') or [] -%}
+          {%- set controllable_count = 0 -%}
+          {%- for entity_id in group_entities -%}
+            {%- if entity_id.startswith(('light.', 'switch.')) -%}
+              {%- set controllable_count = controllable_count + 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ controllable_count }}
+        attributes:
+          controllable_entities: >
+            {%- set group_entities = state_attr('group.estudio_flowers_dynamic', 'entity_id') or [] -%}
+            {%- set controllable_entities = [] -%}
+            {%- for entity_id in group_entities -%}
+              {%- if entity_id.startswith(('light.', 'switch.')) -%}
+                {%- set controllable_entities = controllable_entities + [entity_id] -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {{ controllable_entities }}
+          lights_switches_count: >
+            {%- set group_entities = state_attr('group.estudio_flowers_dynamic', 'entity_id') or [] -%}
+            {%- set controllable_count = 0 -%}
+            {%- for entity_id in group_entities -%}
+              {%- if entity_id.startswith(('light.', 'switch.')) -%}
+                {%- set controllable_entities = controllable_entities + [entity_id] -%}
+                {%- set controllable_count = controllable_count + 1 -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {{ controllable_count }}
+            {{ controllable_entities }}
+        icon: "mdi:lightbulb-group"
